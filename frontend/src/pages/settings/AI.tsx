@@ -87,6 +87,7 @@ export function SettingsAIPanel({ highlight }: { highlight?: string } = {}) {
   const [apiKey, setApiKey] = useState('')
   const [model, setModel] = useState('')
   const [reasoningEffort, setReasoningEffort] = useState(DEFAULT_REASONING_EFFORT)
+  const [thinkingType, setThinkingType] = useState<'default' | 'enabled' | 'disabled'>('default')
   const [codexModel, setCodexModel] = useState('')
   const [codexReasoningEffort, setCodexReasoningEffort] = useState('')
   const [codexCommand, setCodexCommand] = useState(CODEX_COMMAND)
@@ -166,6 +167,7 @@ export function SettingsAIPanel({ highlight }: { highlight?: string } = {}) {
     setBaseUrl(savedBaseUrl)
     setModel(savedOpenAIModel)
     setReasoningEffort(s.ai_reasoning_effort ?? DEFAULT_REASONING_EFFORT)
+    setThinkingType(s.ai_thinking_type ?? 'default')
     setCodexModel(s.ai_codex_model ?? (savedProvider === CODEX_PROVIDER ? s.ai_model : '') ?? '')
     setCodexReasoningEffort(s.ai_codex_reasoning_effort ?? '')
     setCodexCommand(s.ai_codex_command ?? CODEX_COMMAND)
@@ -183,6 +185,7 @@ export function SettingsAIPanel({ highlight }: { highlight?: string } = {}) {
     api_key: apiKey || undefined,
     model: isCodexProvider ? codexModel : model,
     ...(isOpenAIProvider ? { reasoning_effort: reasoningEffort } : {}),
+    ...(provider === OPENAI_COMPAT_PROVIDER ? { thinking_type: thinkingType } : {}),
     codex_command: isCodexProvider ? CODEX_COMMAND : codexCommand,
     codex_reasoning_effort: isCodexProvider ? codexReasoningEffort : '',
     user_agent: customUa ? userAgent : '',
@@ -203,6 +206,7 @@ export function SettingsAIPanel({ highlight }: { highlight?: string } = {}) {
         ai_model: result.ai_model ?? (isCodexProvider ? codexModel : model),
         ai_openai_model: result.ai_openai_model ?? model,
         ai_reasoning_effort: result.ai_reasoning_effort ?? reasoningEffort,
+        ai_thinking_type: result.ai_thinking_type ?? thinkingType,
         ai_codex_model: result.ai_codex_model ?? codexModel,
         ai_codex_command: result.ai_codex_command ?? (isCodexProvider ? CODEX_COMMAND : codexCommand),
         ai_codex_reasoning_effort: result.ai_codex_reasoning_effort ?? (isCodexProvider ? codexReasoningEffort : ''),
@@ -230,6 +234,7 @@ export function SettingsAIPanel({ highlight }: { highlight?: string } = {}) {
       setApiKey('')
       setModel('')
       setReasoningEffort(DEFAULT_REASONING_EFFORT)
+      setThinkingType('default')
       setCodexModel('')
       setCodexReasoningEffort('')
       setCodexCommand(CODEX_COMMAND)
@@ -248,6 +253,7 @@ export function SettingsAIPanel({ highlight }: { highlight?: string } = {}) {
         ai_model: '',
         ai_openai_model: '',
         ai_reasoning_effort: DEFAULT_REASONING_EFFORT,
+        ai_thinking_type: 'default',
         ai_codex_model: '',
         ai_codex_command: CODEX_COMMAND,
         ai_codex_reasoning_effort: '',
@@ -513,6 +519,24 @@ export function SettingsAIPanel({ highlight }: { highlight?: string } = {}) {
                     </Field>
                   </div>
                 </div>
+              )}
+
+              {provider === OPENAI_COMPAT_PROVIDER && (
+                <Field label="深度思考 thinking.type" hint="默认保留原有行为；启用或禁用会发送对应参数，适用于支持 thinking.type 的模型。服务拒绝该参数时会显示错误。">
+                  <div role="group" aria-label="深度思考 thinking.type" className="flex flex-wrap gap-2">
+                    {([
+                      ['default', '默认'],
+                      ['enabled', '启用 enabled'],
+                      ['disabled', '禁用 disabled'],
+                    ] as const).map(([value, label]) => (
+                      <button key={value} type="button" aria-pressed={thinkingType === value}
+                        onClick={() => setThinkingType(value)}
+                        className={`rounded-lg border px-3 py-2 text-xs transition-colors ${thinkingType === value ? 'border-accent/40 bg-accent/10 text-accent' : 'border-border bg-base text-secondary hover:border-accent/30'}`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </Field>
               )}
 
               <Field label="API Key">

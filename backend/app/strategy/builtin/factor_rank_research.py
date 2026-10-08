@@ -65,16 +65,34 @@ _MAX_FACTORS = 4
 _VALID_DIRECTIONS = {"high", "low"}
 
 
+def normalize_scoring_and_directions(
+    scoring: object,
+    directions: object = None,
+) -> tuple[dict[str, float], dict[str, str]]:
+    """Normalize research scoring shorthands.
+
+    Negative weights and "-factor" names both mean lower factor values rank better.
+    The returned scoring always uses canonical factor names and positive weights.
+    """
+    normalized_scoring, implicit_directions = _validated_scoring_config(scoring)
+    return normalized_scoring, _merged_directions(
+        implicit_directions,
+        directions,
+        normalized_scoring,
+    )
+
+
 class FactorRankResearchMatrixStrategy:
     def __init__(
         self,
         scoring: dict[str, float] | None = None,
         directions: dict[str, str] | None = None,
     ) -> None:
-        self._scoring = _validated_scoring(scoring) if scoring is not None else None
+        scoring_config = _validated_scoring_config(scoring) if scoring is not None else None
+        self._scoring = scoring_config[0] if scoring_config is not None else None
         self._directions = (
-            _validated_directions(directions, self._scoring)
-            if directions is not None and self._scoring is not None
+            _merged_directions(scoring_config[1], directions, self._scoring)
+            if scoring_config is not None and self._scoring is not None
             else None
         )
 
@@ -102,10 +120,14 @@ class FactorRankResearchMatrixStrategy:
         return frozenset(_validated_scoring(raw))
 
     def compute_signals(self, market: MarketDataMatrix, params: dict) -> SignalMatrix:
-        scoring = self._scoring or _validated_scoring(params.get("scoring"))
-        directions = self._directions or _validated_directions(
-            params.get("directions"), scoring
-        )
+        if self._scoring is not None:
+            scoring = self._scoring
+            directions = self._directions or {}
+        else:
+            scoring, directions = normalize_scoring_and_directions(
+                params.get("scoring"),
+                params.get("directions"),
+            )
         entry_score = _bounded_float(params.get("entry_score", 70.0), "entry_score")
         exit_score = _bounded_float(params.get("exit_score", 40.0), "exit_score")
         top_rank = int(params.get("top_rank", 20))
@@ -140,22 +162,46 @@ class FactorRankResearchMatrixStrategy:
 
 
 def _validated_scoring(raw: object) -> dict[str, float]:
+    return _validated_scoring_config(raw)[0]
+
+
+def _validated_scoring_config(raw: object) -> tuple[dict[str, float], dict[str, str]]:
     if not isinstance(raw, dict) or not raw:
         raise ValueError("factor-rank research requires a non-empty scoring mapping")
     if len(raw) > _MAX_FACTORS:
         raise ValueError(f"factor-rank research supports at most {_MAX_FACTORS} factors")
     scoring: dict[str, float] = {}
+    directions: dict[str, str] = {}
     for name, value in raw.items():
         if not isinstance(name, str) or not name:
             raise ValueError("scoring factor names must be non-empty strings")
+        factor_name = name[1:] if name.startswith("-") else name
+        if not factor_name:
+            raise ValueError("scoring factor names must be non-empty strings")
+        if factor_name in scoring:
+            raise ValueError(f"scoring contains duplicate factor {factor_name!r}")
+        if isinstance(value, bool):
+            raise ValueError(f"scoring weight for {name!r} must be numeric")
         try:
             weight = float(value)
         except (TypeError, ValueError) as exc:
             raise ValueError(f"scoring weight for {name!r} must be numeric") from exc
-        if not np.isfinite(weight) or weight <= 0.0:
-            raise ValueError(f"scoring weight for {name!r} must be finite and positive")
-        scoring[name] = weight
-    return scoring
+        if not np.isfinite(weight) or weight == 0.0:
+            raise ValueError(f"scoring weight for {name!r} must be finite and non-zero")
+        scoring[factor_name] = abs(weight)
+        if name.startswith("-") or weight < 0.0:
+            directions[factor_name] = "low"
+    return scoring, directions
+
+
+def _merged_directions(
+    implicit: dict[str, str],
+    raw: object,
+    scoring: dict[str, float],
+) -> dict[str, str]:
+    directions = _validated_directions(raw, scoring)
+    directions.update(implicit)
+    return directions
 
 
 def _validated_directions(

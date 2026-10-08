@@ -124,6 +124,21 @@ def test_dependency_resolver_includes_parameter_scoring_fields():
     assert {"amount", "close"}.issubset(plan.matrix_columns)
 
 
+def test_dependency_resolver_strips_negative_factor_prefix_from_parameter_scoring():
+    strategy = StrategyEngine._load_file(STRATEGY_PATH)
+
+    plan = StrategyDependencyResolver().resolve(
+        strategy,
+        params={"scoring": {"-amount": 1.0}},
+        basic_filter={"enabled": False},
+        entry_signals=strategy.entry_signals,
+        exit_signals=strategy.exit_signals,
+    )
+
+    assert "amount" in plan.matrix_columns
+    assert "-amount" not in plan.matrix_columns
+
+
 def test_strategy_uses_controlled_scoring_directions_thresholds_and_top_rank():
     strategy = StrategyEngine._load_file(STRATEGY_PATH).matrix_strategy
     market = _market()
@@ -146,6 +161,40 @@ def test_strategy_uses_controlled_scoring_directions_thresholds_and_top_rank():
     assert signals.entry_signal_ids == ("signal_factor_rank_entry",)
     assert signals.exit_signal_ids == ("signal_factor_rank_exit",)
     assert not signals.score.flags.writeable
+
+
+@pytest.mark.parametrize(
+    "scoring",
+    [
+        {"amount": -1.0},
+        {"-amount": 1.0},
+    ],
+)
+def test_strategy_treats_negative_weight_or_factor_prefix_as_low_direction(scoring):
+    strategy = StrategyEngine._load_file(STRATEGY_PATH).matrix_strategy
+    market = _market()
+
+    implicit_low = strategy.compute_signals(
+        market,
+        {
+            "scoring": scoring,
+            "entry_score": 0.0,
+            "exit_score": 0.0,
+            "top_rank": 4,
+        },
+    )
+    explicit_low = strategy.compute_signals(
+        market,
+        {
+            "scoring": {"amount": 1.0},
+            "directions": {"amount": "low"},
+            "entry_score": 0.0,
+            "exit_score": 0.0,
+            "top_rank": 4,
+        },
+    )
+
+    np.testing.assert_allclose(implicit_low.score, explicit_low.score)
 
 
 def test_strategy_direction_changes_score_without_dynamic_formula_execution():
@@ -193,6 +242,11 @@ def test_strategy_direction_changes_score_without_dynamic_formula_execution():
         (
             {"scoring": {f"factor_{index}": 1.0 for index in range(5)}},
             "at most 4 factors",
+        ),
+        ({"scoring": {"amount": 0.0}}, "finite and non-zero"),
+        (
+            {"scoring": {"amount": 1.0, "-amount": 1.0}},
+            "duplicate factor",
         ),
         (
             {

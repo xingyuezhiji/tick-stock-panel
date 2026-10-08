@@ -69,6 +69,9 @@ class MatcherConfig:
     score_max: float | None = None
     initial_capital: float = 1_000_000.0
     position_sizing: Literal["equal", "score_weight"] = "equal"
+    # 组合再平衡: 默认关闭。equal_weight 会在有新 entry 候选的交易日,
+    # 先执行常规卖出/买入, 再把仍持有的仓位拉回等权目标。
+    rebalance_mode: Literal["none", "equal_weight"] = "none"
     # 分钟K精确成交: 开启后, 信号触发日的成交价用当日分钟K优化
     # (有参考线→穿越价, 无参考线→VWAP)。数据缺失时降级为日K口径。
     minute_fill: bool = False
@@ -1787,6 +1790,11 @@ class BacktestEngine:
             "sell_suspended": 0,
             "sell_limit_down": 0,
             "pending_exit": 0,
+            "rebalance_buy": 0,
+            "rebalance_sell": 0,
+            "rebalance_buy_blocked": 0,
+            "rebalance_sell_blocked": 0,
+            "rebalance_lot_size": 0,
         }
 
         minute_cache: dict = {}
@@ -1982,6 +1990,107 @@ class BacktestEngine:
             _sell(time_id, asset_id, reason, signal_date, sold_today, override)
             return True
 
+        def _mark_price(time_id: int, asset_id: int, fallback: float) -> float:
+            mark = float(matrix.close[time_id, asset_id])
+            if _valid_price(mark):
+                return mark
+            last = float(last_close[asset_id])
+            if _valid_price(last):
+                return last
+            return fallback
+
+        def _rebalance_equal_weight(
+            time_id: int,
+            sold_today: set[int],
+        ) -> None:
+            nonlocal cash
+            if config.rebalance_mode != "equal_weight" or max_exposure_pct <= 0:
+                return
+            if not matrix.entry[time_id].any():
+                return
+            active_assets = [
+                int(asset)
+                for asset, pos in positions.items()
+                if not pos.get("pending_exit_reason") and asset not in sold_today
+            ]
+            if len(active_assets) <= 1:
+                return
+            gross_values = {
+                asset: positions[asset]["shares"] * _mark_price(
+                    time_id, asset, float(positions[asset]["entry_price"])
+                )
+                for asset in active_assets
+            }
+            equity = cash + sum(gross_values.values())
+            if equity <= 0:
+                return
+            target_value = equity * max_exposure_pct / len(active_assets)
+
+            for asset in sorted(active_assets, key=lambda item: gross_values[item], reverse=True):
+                pos = positions.get(asset)
+                if pos is None:
+                    continue
+                current_value = gross_values[asset]
+                excess = current_value - target_value
+                if excess <= 0:
+                    continue
+                sell_price = _refill_price(time_id, asset, "sell", float(exit_prices[time_id, asset]))
+                ok, blocked = _can_sell(time_id, asset, sell_price)
+                if not ok:
+                    _count("rebalance_sell_blocked")
+                    _count(blocked)
+                    continue
+                shares_to_sell = np.floor(excess / sell_price / 100) * 100
+                shares_to_sell = min(float(shares_to_sell), max(float(pos["shares"]) - 100.0, 0.0))
+                if shares_to_sell <= 0:
+                    _count("rebalance_lot_size")
+                    continue
+                old_shares = float(pos["shares"])
+                cash += shares_to_sell * sell_price * (1 - sell_cost_pct)
+                remaining_ratio = (old_shares - shares_to_sell) / old_shares
+                pos["shares"] = old_shares - shares_to_sell
+                pos["lots"] = pos["shares"] / 100
+                pos["entry_value"] = float(pos["entry_value"]) * remaining_ratio
+                _count("rebalance_sell")
+
+            for asset in sorted(active_assets, key=lambda item: gross_values[item]):
+                pos = positions.get(asset)
+                if pos is None:
+                    continue
+                buy_price = _refill_price(time_id, asset, "buy", float(entry_prices[time_id, asset]))
+                ok, blocked = _can_buy(time_id, asset)
+                if not ok:
+                    _count("rebalance_buy_blocked")
+                    _count(blocked)
+                    continue
+                current_value = float(pos["shares"]) * buy_price
+                shortfall = target_value - current_value
+                if shortfall <= 0:
+                    continue
+                shares_to_buy = np.floor(shortfall / (buy_price * (1 + buy_cost_pct)) / 100) * 100
+                if shares_to_buy <= 0:
+                    _count("rebalance_lot_size")
+                    continue
+                entry_value = shares_to_buy * buy_price * (1 + buy_cost_pct)
+                if entry_value > cash + 1e-6:
+                    affordable = np.floor(cash / (buy_price * (1 + buy_cost_pct)) / 100) * 100
+                    shares_to_buy = max(float(affordable), 0.0)
+                    entry_value = shares_to_buy * buy_price * (1 + buy_cost_pct)
+                if shares_to_buy <= 0:
+                    _count("rebalance_buy_blocked")
+                    continue
+                old_shares = float(pos["shares"])
+                old_entry_price = float(pos["entry_price"])
+                new_shares = old_shares + shares_to_buy
+                cash -= entry_value
+                pos["shares"] = new_shares
+                pos["lots"] = new_shares / 100
+                pos["entry_price"] = (
+                    old_entry_price * old_shares + buy_price * shares_to_buy
+                ) / new_shares
+                pos["entry_value"] = float(pos["entry_value"]) + entry_value
+                _count("rebalance_buy")
+
         for time_id, date_label in enumerate(matrix.timestamp_labels):
             date_text = date_label[:10]
             if time_id % 20 == 0:
@@ -2150,6 +2259,8 @@ class BacktestEngine:
                                 "blocked_exit_days": 0,
                             }
 
+            _rebalance_equal_weight(time_id, sold_today)
+
             for asset_id, pos in positions.items():
                 high_price = float(matrix.high[time_id, asset_id])
                 if _valid_price(high_price):
@@ -2192,6 +2303,15 @@ class BacktestEngine:
             1,
         )
         stats["execution"] = execution_stats
+        if config.rebalance_mode != "equal_weight":
+            for key in (
+                "rebalance_buy",
+                "rebalance_sell",
+                "rebalance_buy_blocked",
+                "rebalance_sell_blocked",
+                "rebalance_lot_size",
+            ):
+                stats["execution"].pop(key, None)
         stats["pending_exit_positions"] = sum(1 for pos in positions.values() if pos.get("pending_exit_reason"))
         stats["market_matrix_shape"] = [time_count, asset_count]
         stats["market_matrix_bytes"] = matrix.nbytes

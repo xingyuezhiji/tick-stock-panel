@@ -874,6 +874,18 @@ class StrategyBacktestService:
             max_hold,
         )
 
+    @staticmethod
+    def _effective_rebalance_mode(strategy: StrategyDef, overrides: dict) -> str:
+        """Resolve optional portfolio rebalance mode from overrides or META."""
+        override_value = overrides.get("rebalance_mode")
+        if override_value is None and isinstance(overrides.get("rebalance"), dict):
+            override_value = overrides["rebalance"].get("mode")
+        meta_value = strategy.meta.get("rebalance")
+        if override_value is None and isinstance(meta_value, dict):
+            override_value = meta_value.get("mode")
+        value = str(override_value or "none").strip().lower()
+        return value if value in {"none", "equal_weight"} else "none"
+
     def prepare_matrix_optimization(
         self,
         configs: list[StrategyBacktestConfig],
@@ -1327,6 +1339,7 @@ class StrategyBacktestService:
             score_max=score_max,
             initial_capital=config.initial_capital,
             position_sizing=config.position_sizing,
+            rebalance_mode=self._effective_rebalance_mode(s, overrides),
             minute_fill=config.minute_fill,
             asset_type=config.asset_type,
         )

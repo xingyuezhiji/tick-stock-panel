@@ -128,6 +128,11 @@ def current_openai_model() -> str:
     return secrets_store.get_ai_config("ai_model", settings.ai_model)
 
 
+def current_ai_thinking_type() -> str:
+    value = secrets_store.get_ai_config("ai_thinking_type", settings.ai_thinking_type)
+    return value if value in {"enabled", "disabled"} else "default"
+
+
 def current_codex_model() -> str:
     stored = secrets_store.load()
     model = stored.get("ai_codex_model")
@@ -681,6 +686,9 @@ def _openai_retry_kwargs(exc: Exception, kwargs: dict) -> dict | None:
         retry_kwargs.pop("reasoning_effort")
         return retry_kwargs
     if "extra_body" in retry_kwargs and _is_thinking_body_rejected(exc):
+        if current_ai_provider() == OPENAI_COMPAT_PROVIDER and current_ai_thinking_type() != "default":
+            # 用户明确指定的思考模式不能在重试时静默丢弃。
+            return None
         # DeepSeek thinking 禁用参数被拒 (模型/API 版本差异): 回退默认思考模式
         # 重试; 报告若因此被推理挤占正文, 由 _iter_openai_text 显式报错。
         retry_kwargs.pop("extra_body")
@@ -714,7 +722,10 @@ def _openai_kwargs(
         reasoning_effort = current_openai_reasoning_effort()
         if reasoning_effort:
             kwargs["reasoning_effort"] = reasoning_effort
-    if (
+    thinking_type = current_ai_thinking_type()
+    if current_ai_provider() == OPENAI_COMPAT_PROVIDER and thinking_type != "default":
+        kwargs["extra_body"] = {"thinking": {"type": thinking_type}}
+    elif (
         prefer_final_answer
         and model.strip().lower() in _DEEPSEEK_V4_MODELS
         and urlsplit(base_url.strip()).hostname == "api.deepseek.com"

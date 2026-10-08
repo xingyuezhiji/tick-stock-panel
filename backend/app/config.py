@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -87,6 +88,7 @@ class Settings(BaseSettings):
     ai_base_url: str = "https://llm.runninghub.ai/v1"
     ai_api_key: str = ""
     ai_model: str = "openai/gpt-6-astra-saver"
+    ai_thinking_type: Literal["default", "enabled", "disabled"] = "default"
     ai_codex_command: str = "codex"
     ai_codex_reasoning_effort: str = ""
     # 默认浏览器风格 UA,绕过 Cloudflare 等 CDN/WAF 的 Bot 拦截(Issue #8)。

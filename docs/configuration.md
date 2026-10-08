@@ -58,6 +58,7 @@ AI_PROVIDER=openai_compat              # openai_compat | ollama
 AI_BASE_URL=https://api.deepseek.com/v1
 AI_API_KEY=                            # 留空 = 关闭 AI
 AI_MODEL=deepseek-chat
+AI_THINKING_TYPE=default               # default | enabled | disabled
 AI_DAILY_TOKEN_BUDGET=500000           # 每日 token 预算上限
 ```
 
@@ -67,7 +68,10 @@ AI_DAILY_TOKEN_BUDGET=500000           # 每日 token 预算上限
 | `AI_BASE_URL` | 接口地址,如 DeepSeek `https://api.deepseek.com/v1` |
 | `AI_API_KEY` | 留空则关闭 AI 功能 |
 | `AI_MODEL` | 模型名,如 `deepseek-chat` |
+| `AI_THINKING_TYPE` | 兼容接口的深度思考选项：`default` 保留原有行为，`enabled` / `disabled` 在请求中发送对应的 `thinking.type`。页面保存后立即生效，覆盖环境配置；普通请求、分析报告和 AI 助手均适用。OpenAI 官方模式及 Codex CLI 不使用此项。 |
 | `AI_DAILY_TOKEN_BUDGET` | 每日 token 预算,超限后当日不再调用 |
+
+在「设置 → AI」选择「深度思考 thinking.type」后保存即可。选「默认」时通常不发送该参数，DeepSeek V4 官方接口的报告请求仍沿用原有的禁用思考处理。明确选择 enabled 或 disabled 后，若上游拒绝该参数，会显示请求错误，不会自动撤销选择；此时可改回「默认」。
 
 接入示例见 [strategy.md](./strategy.md) 的「AI 生成策略」章节。
 

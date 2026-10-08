@@ -61,6 +61,7 @@ from app.services.mining_jobs import MiningRunStore
 from app.services.mining_preflight import enriched_partition_dates
 from app.services.mining_schedule import MINING_ALGORITHM_VERSION
 from app.strategy import config as strategy_config
+from app.strategy.builtin.factor_rank_research import normalize_scoring_and_directions
 from app.strategy.engine import StrategyEngine
 
 ProgressCallback = Callable[[dict[str, Any]], None]
@@ -263,11 +264,13 @@ class MatcherCandidateEvaluator:
             directions = definition.get("directions")
             if not isinstance(scoring, Mapping) or not scoring:
                 raise ValueError("factor candidate has no scoring definition")
-            if not isinstance(directions, Mapping):
-                raise ValueError("factor candidate has no direction definition")
+            normalized_scoring, normalized_directions = normalize_scoring_and_directions(
+                scoring,
+                directions,
+            )
             params = {
-                "scoring": {str(key): float(value) for key, value in scoring.items()},
-                "directions": {str(key): str(value) for key, value in directions.items()},
+                "scoring": normalized_scoring,
+                "directions": normalized_directions,
                 "entry_score": 70.0,
                 "exit_score": 40.0,
                 "top_rank": 20,

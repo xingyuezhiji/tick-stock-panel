@@ -23,6 +23,7 @@ from app.backtest.factor import FACTOR_COLUMNS
 from app.backtest.mining import compute_candidate_signature, evaluate_candidate_gate
 from app.services.mining_jobs import SUCCESS_RUN_STATUSES, MiningRunStore
 from app.strategy.ai_generator import AIStrategyGenerator
+from app.strategy.builtin.factor_rank_research import normalize_scoring_and_directions
 from app.strategy.engine import StrategyEngine
 
 _MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
@@ -350,20 +351,16 @@ class MiningCandidateService:
             raise ValueError("factor candidate must contain 1 to 4 unique factors")
         scoring = definition.get("scoring")
         directions = definition.get("directions")
-        if not isinstance(scoring, Mapping) or set(scoring) != set(factor_names):
+        if not isinstance(scoring, Mapping):
             raise ValueError("factor scoring keys must exactly match factor names")
-        if not isinstance(directions, Mapping) or set(directions) != set(factor_names):
-            raise ValueError("factor direction keys must exactly match factor names")
+        normalized_scoring, normalized_directions = normalize_scoring_and_directions(
+            scoring,
+            directions,
+        )
+        if set(normalized_scoring) != set(factor_names):
+            raise ValueError("factor scoring keys must exactly match factor names")
         for factor_name in factor_names:
-            weight = scoring[factor_name]
-            if (
-                isinstance(weight, bool)
-                or not isinstance(weight, (int, float))
-                or not math.isfinite(float(weight))
-                or float(weight) <= 0.0
-            ):
-                raise ValueError("factor weights must be finite and positive")
-            if directions[factor_name] not in {"high", "low"}:
+            if normalized_directions.get(factor_name, "high") not in {"high", "low"}:
                 raise ValueError("factor directions must be high or low")
         unknown = sorted(set(factor_names) - _FACTOR_IDS)
         if unknown:
@@ -559,11 +556,10 @@ class MiningCandidateService:
         strategy_id: str,
     ) -> str:
         asset_type = self._asset_type(manifest)
-        factor_names = list(definition["factor_names"])
-        scoring = {
-            name: float(definition["scoring"][name]) for name in factor_names
-        }
-        directions = {name: definition["directions"][name] for name in factor_names}
+        scoring, directions = normalize_scoring_and_directions(
+            definition["scoring"],
+            definition.get("directions"),
+        )
         meta = {
             "id": strategy_id,
             "name": row["name"],

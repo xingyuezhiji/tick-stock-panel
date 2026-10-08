@@ -52,6 +52,26 @@ def _factor_definition() -> dict:
     }
 
 
+def test_factor_candidate_signature_normalizes_negative_scoring_shorthands() -> None:
+    explicit = compute_candidate_signature({
+        "kind": "factor_rank",
+        "factor_names": ["turnover_rate"],
+        "scoring": {"turnover_rate": 1.0},
+        "directions": {"turnover_rate": "low"},
+    })
+
+    assert compute_candidate_signature({
+        "kind": "factor_rank",
+        "factor_names": ["turnover_rate"],
+        "scoring": {"turnover_rate": -1.0},
+    }) == explicit
+    assert compute_candidate_signature({
+        "kind": "factor_rank",
+        "factor_names": ["turnover_rate"],
+        "scoring": {"-turnover_rate": 1.0},
+    }) == explicit
+
+
 def _create_run(
     tmp_path,
     *,
@@ -320,7 +340,7 @@ def test_promote_rejects_artifact_conflicting_with_existing_store_record(
                 "scoring": {"turnover_rate": 0.0},
                 "directions": {"turnover_rate": "high"},
             },
-            "positive",
+            "non-zero",
         ),
         (
             {
@@ -338,7 +358,7 @@ def test_promote_rejects_artifact_conflicting_with_existing_store_record(
                 "scoring": {"turnover_rate": 1.0},
                 "directions": {"turnover_rate": "sideways"},
             },
-            "directions",
+            "direction",
         ),
         (
             {
@@ -456,6 +476,26 @@ def test_publish_factor_discovers_public_strategy_and_repairs_runtime_state(tmp_
     persisted = pl.read_parquet(store.artifact_path(run_id, "candidates")).row(0, named=True)
     assert persisted["published_strategy_id"] == result["strategy_id"]
     assert invalidations == [tmp_path, "monitor", tmp_path, "monitor"]
+
+
+def test_publish_factor_normalizes_negative_scoring_shorthands(tmp_path) -> None:
+    definition = {
+        "kind": "factor_rank",
+        "factor_names": ["turnover_rate", "rsi_14"],
+        "scoring": {"-turnover_rate": 1.0, "rsi_14": -2.0},
+        "directions": {},
+    }
+    store, run_id, signature = _create_run(tmp_path, definition=definition)
+    service, engine = _real_service(tmp_path, store)
+
+    result = service.publish(run_id, signature)
+
+    strategy = engine.get(result["strategy_id"])
+    assert strategy.matrix_strategy._scoring == {"turnover_rate": 1.0, "rsi_14": 2.0}
+    assert strategy.matrix_strategy._directions == {
+        "turnover_rate": "low",
+        "rsi_14": "low",
+    }
 
 
 def test_publish_factor_repairs_backlink_after_source_was_verified(

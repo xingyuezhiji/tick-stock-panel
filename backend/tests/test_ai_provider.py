@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tomllib
 from types import SimpleNamespace
 
@@ -20,6 +21,117 @@ from app.services.ai_provider import (
 
 def test_normalize_openai_base_url_adds_v1_for_root_gateway():
     assert normalize_openai_base_url("http://ai.zedbox.cn:8080") == "http://ai.zedbox.cn:8080/v1"
+
+
+@pytest.fixture
+def thinking_config(monkeypatch, tmp_path):
+    # 使用临时凭据目录, 不读取或覆盖本机 AI 配置。
+    for field in type(settings).model_fields:
+        monkeypatch.setattr(settings, field, getattr(settings, field))
+    monkeypatch.setattr(settings, "data_dir", tmp_path)
+    monkeypatch.setattr(settings, "ai_thinking_type", "default")
+    monkeypatch.setattr(settings, "ai_provider", "openai_compat")
+    return tmp_path
+
+
+@pytest.mark.parametrize("mode", ["default", "enabled", "disabled"])
+def test_thinking_settings_roundtrip_and_clear(thinking_config, mode):
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    app = FastAPI()
+    app.include_router(settings_api.router)
+    with TestClient(app) as client:
+        response = client.post("/api/settings/ai", json={"thinking_type": mode})
+        assert response.status_code == 200
+        assert response.json()["ai_thinking_type"] == mode
+        assert secrets_store.load()["ai_thinking_type"] == mode
+        # 模拟重启后内存回默认, 验证仍然从持久配置读取。
+        settings.ai_thinking_type = "default"
+        assert client.get("/api/settings").json()["ai_thinking_type"] == mode
+        assert client.post("/api/settings/ai", json={}).json()["ai_thinking_type"] == mode
+        assert client.delete("/api/settings/ai").status_code == 200
+        assert client.get("/api/settings").json()["ai_thinking_type"] == "default"
+        assert "ai_thinking_type" not in secrets_store.load()
+
+
+@pytest.mark.parametrize("invalid", ["true", "", "auto", True, 1])
+def test_thinking_settings_reject_invalid_values(thinking_config, invalid):
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    app = FastAPI()
+    app.include_router(settings_api.router)
+    with TestClient(app) as client:
+        response = client.post("/api/settings/ai", json={"thinking_type": invalid})
+    assert response.status_code == 422
+    assert "ai_thinking_type" not in secrets_store.load()
+
+
+@pytest.mark.parametrize("mode", ["default", "enabled", "disabled"])
+@pytest.mark.parametrize("path", ["completion", "report", "assistant"])
+async def test_thinking_type_reaches_http_request(thinking_config, monkeypatch, mode, path):
+    from app.custom.assistant import streaming
+
+    secrets_store.save({"ai_thinking_type": mode, "ai_api_key": "test-key", "ai_model": "test-model"})
+    captured = []
+
+    def respond(request):
+        body = json.loads(request.content)
+        captured.append(body)
+        if body.get("stream"):
+            chunk = {"id": "test", "choices": [{"index": 0, "delta": {"content": "ok"}, "finish_reason": "stop"}]}
+            return httpx.Response(200, headers={"content-type": "text/event-stream"},
+                                  text=f"data: {json.dumps(chunk)}\n\ndata: [DONE]\n\n")
+        return httpx.Response(200, json={"id": "test", "choices": [
+            {"index": 0, "message": {"role": "assistant", "content": "ok"}, "finish_reason": "stop"},
+        ]})
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as transport:
+        client = openai.AsyncOpenAI(api_key="test-key", base_url="https://example.com/v1", http_client=transport)
+        monkeypatch.setattr(ai_provider, "_openai_client", lambda *_: client)
+        monkeypatch.setattr(streaming, "_client", lambda *_: client)
+        messages = [{"role": "user", "content": "hello"}]
+        if path == "completion":
+            result = await ai_provider._run_openai_message_once(messages, temperature=0.3, max_tokens=100, timeout=5)
+            assert result.content == "ok"
+        elif path == "report":
+            result = [part async for part in ai_provider._stream_openai(
+                messages, temperature=0.3, max_tokens=100, timeout=5, prefer_final_answer=True,
+            )]
+            assert result == ["ok"]
+        else:
+            result = [part async for part in streaming.stream_openai_round(messages, [], timeout=5)]
+            assert result[0] == {"type": "text", "delta": "ok"}
+    assert len(captured) == 1
+    if mode == "default":
+        assert "thinking" not in captured[0]
+    else:
+        assert captured[0]["thinking"] == {"type": mode}
+
+
+@pytest.mark.parametrize("mode", ["enabled", "disabled"])
+def test_explicit_thinking_overrides_deepseek_and_is_not_dropped(thinking_config, mode):
+    from app.custom.assistant import streaming
+
+    secrets_store.save({"ai_thinking_type": mode})
+    kwargs = ai_provider._openai_kwargs(temperature=None, max_tokens=100,
+        model="deepseek-v4-pro", base_url="https://api.deepseek.com", prefer_final_answer=True)
+    assert kwargs["extra_body"] == {"thinking": {"type": mode}}
+    response = httpx.Response(400, request=httpx.Request("POST", "https://example.com"))
+    exc = openai.BadRequestError("unsupported thinking", response=response,
+                                body={"error": {"param": "thinking"}})
+    assert ai_provider._openai_retry_kwargs(exc, kwargs) is None
+    assert streaming._retry_kwargs(exc, kwargs) is None
+
+
+@pytest.mark.parametrize("provider", ["openai", "codex_cli"])
+def test_thinking_not_sent_to_other_provider_modes(thinking_config, provider):
+    from app.custom.assistant import streaming
+
+    secrets_store.save({"ai_thinking_type": "enabled", "ai_provider": provider})
+    assert "extra_body" not in ai_provider._openai_kwargs(temperature=None, max_tokens=None)
+    assert "extra_body" not in streaming._build_kwargs(None)
 
 
 def test_normalize_openai_base_url_preserves_v1_base():

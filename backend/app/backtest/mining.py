@@ -1393,28 +1393,51 @@ def compute_candidate_signature(definition: Mapping[str, Any]) -> str:
     directions = definition.get("directions")
     if not isinstance(factor_names, list) or not factor_names:
         raise ValueError("factor candidate requires factor_names")
-    if not isinstance(scoring, Mapping) or set(scoring) != set(factor_names):
+    if len(set(factor_names)) != len(factor_names):
+        raise ValueError("factor candidate factor_names must be unique")
+    if not isinstance(scoring, Mapping):
         raise ValueError("factor candidate scoring keys must match factor_names")
-    if not isinstance(directions, Mapping) or set(directions) != set(factor_names):
+    if directions is not None and not isinstance(directions, Mapping):
         raise ValueError("factor candidate direction keys must match factor_names")
 
-    weights: list[str] = []
-    direction_values: list[str] = []
-    for factor_name in factor_names:
-        if not isinstance(factor_name, str) or not factor_name:
+    normalized_scoring: dict[str, float] = {}
+    normalized_directions: dict[str, str] = {}
+    for raw_name, value in scoring.items():
+        if not isinstance(raw_name, str) or not raw_name:
             raise ValueError("factor names must be non-empty strings")
-        value = scoring[factor_name]
+        factor_name = raw_name[1:] if raw_name.startswith("-") else raw_name
+        if not factor_name:
+            raise ValueError("factor names must be non-empty strings")
+        if factor_name in normalized_scoring:
+            raise ValueError("factor candidate scoring contains duplicate factors")
         if isinstance(value, bool):
             raise ValueError("factor weights must be numeric")
         try:
             weight = float(value)
         except (TypeError, ValueError) as exc:
             raise ValueError("factor weights must be numeric") from exc
-        if not math.isfinite(weight) or weight <= 0.0:
-            raise ValueError("factor weights must be finite and positive")
-        direction = directions[factor_name]
+        if not math.isfinite(weight) or weight == 0.0:
+            raise ValueError("factor weights must be finite and non-zero")
+        normalized_scoring[factor_name] = abs(weight)
+        if raw_name.startswith("-") or weight < 0.0:
+            normalized_directions[factor_name] = "low"
+    if set(normalized_scoring) != set(factor_names):
+        raise ValueError("factor candidate scoring keys must match factor_names")
+    raw_directions = directions or {}
+    if set(raw_directions) - set(factor_names):
+        raise ValueError("factor candidate direction keys must match factor_names")
+    for factor_name, direction in raw_directions.items():
         if direction not in {"high", "low"}:
             raise ValueError("factor directions must be high or low")
+        normalized_directions[str(factor_name)] = str(direction)
+
+    weights: list[str] = []
+    direction_values: list[str] = []
+    for factor_name in factor_names:
+        if not isinstance(factor_name, str) or not factor_name:
+            raise ValueError("factor names must be non-empty strings")
+        weight = normalized_scoring[factor_name]
+        direction = normalized_directions.get(factor_name, "high")
         weights.append(f"{weight:g}")
         direction_values.append("1" if direction == "high" else "-1")
     return (

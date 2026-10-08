@@ -223,3 +223,50 @@ def test_lightweight_portfolio_keeps_stats_without_curves_or_monte_carlo(monkeyp
     assert "mc_maxdd_p50" not in light.stats
     for name in ("total_return", "annual_return", "max_drawdown", "sharpe", "sortino"):
         assert light.stats[name] == full.stats[name]
+
+
+def test_matrix_equal_weight_rebalance_partially_adjusts_existing_positions():
+    rows = []
+    for symbol in ("A", "B"):
+        for day in range(4):
+            price = 20 if symbol == "A" and day >= 1 else 10
+            rows.append(_row(
+                symbol,
+                day,
+                price,
+                signal_entry=day in {0, 2},
+                score=100 if symbol == "A" else 90,
+            ))
+    panel = pl.DataFrame(rows).sort(["symbol", "date"])
+    matrix = build_market_matrix(panel, panel["signal_entry"], None)
+    engine = BacktestEngine(repo=None)  # type: ignore[arg-type]
+
+    baseline = engine.simulate_market_matrix(
+        matrix,
+        MatcherConfig(
+            matching="close_t",
+            fees_pct=0,
+            slippage_bps=0,
+            max_positions=2,
+            initial_capital=100_000,
+        ),
+    )
+    rebalanced = engine.simulate_market_matrix(
+        matrix,
+        MatcherConfig(
+            matching="close_t",
+            fees_pct=0,
+            slippage_bps=0,
+            max_positions=2,
+            initial_capital=100_000,
+            rebalance_mode="equal_weight",
+        ),
+    )
+
+    baseline_shares = {trade.symbol: trade.shares for trade in baseline.trades}
+    rebalanced_shares = {trade.symbol: trade.shares for trade in rebalanced.trades}
+
+    assert baseline_shares == {"A": 5000.0, "B": 5000.0}
+    assert rebalanced_shares == {"A": 3800.0, "B": 7400.0}
+    assert rebalanced.stats["execution"]["rebalance_sell"] == 1
+    assert rebalanced.stats["execution"]["rebalance_buy"] == 1

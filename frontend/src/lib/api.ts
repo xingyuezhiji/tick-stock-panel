@@ -1814,6 +1814,7 @@ export interface SettingsState {
   ai_model: string
   ai_openai_model?: string
   ai_reasoning_effort?: string
+  ai_thinking_type?: 'default' | 'enabled' | 'disabled'
   ai_codex_model?: string
   ai_codex_command?: string
   ai_codex_reasoning_effort?: string
@@ -2197,8 +2198,8 @@ export const api = {
     ),
 
   /** 保存 AI 配置 */
-  saveAiSettings: (ai: { provider?: string; base_url?: string; api_key?: string; model?: string; reasoning_effort?: string; codex_command?: string; codex_reasoning_effort?: string; user_agent?: string; max_output_tokens?: number; context_window?: number; round_checkpoint?: number }) =>
-    request<{ ok: boolean; ai_provider?: string; ai_model?: string; ai_openai_model?: string; ai_reasoning_effort?: string; ai_codex_model?: string; ai_codex_command?: string; ai_codex_reasoning_effort?: string; ai_configured?: boolean; ai_max_output_tokens?: number; ai_context_window?: number; ai_round_checkpoint?: number }>('/api/settings/ai', {
+  saveAiSettings: (ai: { provider?: string; base_url?: string; api_key?: string; model?: string; reasoning_effort?: string; thinking_type?: 'default' | 'enabled' | 'disabled'; codex_command?: string; codex_reasoning_effort?: string; user_agent?: string; max_output_tokens?: number; context_window?: number; round_checkpoint?: number }) =>
+    request<{ ok: boolean; ai_provider?: string; ai_model?: string; ai_openai_model?: string; ai_reasoning_effort?: string; ai_thinking_type?: 'default' | 'enabled' | 'disabled'; ai_codex_model?: string; ai_codex_command?: string; ai_codex_reasoning_effort?: string; ai_configured?: boolean; ai_max_output_tokens?: number; ai_context_window?: number; ai_round_checkpoint?: number }>('/api/settings/ai', {
       method: 'POST',
       body: JSON.stringify(ai),
     }),

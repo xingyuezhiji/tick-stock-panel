@@ -24,9 +24,11 @@ from openai import AsyncOpenAI
 from app import secrets_store
 from app.config import settings
 from app.services.ai_provider import (
+    OPENAI_COMPAT_PROVIDER,
     OPENAI_PROVIDER,
     current_ai_model,
     current_ai_provider,
+    current_ai_thinking_type,
     current_openai_reasoning_effort,
     normalize_openai_base_url,
 )
@@ -36,7 +38,7 @@ _LENGTH_FINISH_REASONS = {"length", "max_tokens", "max_output_tokens"}
 
 
 def _build_kwargs(temperature: float | None) -> dict[str, Any]:
-    """与核心 _openai_kwargs 同语义的精简版: temperature/max_tokens/reasoning_effort。"""
+    """与核心 _openai_kwargs 同语义的流式工具请求参数。"""
     kwargs: dict[str, Any] = {}
     if temperature is not None:
         kwargs["temperature"] = temperature
@@ -44,6 +46,10 @@ def _build_kwargs(temperature: float | None) -> dict[str, Any]:
         effort = current_openai_reasoning_effort()
         if effort:
             kwargs["reasoning_effort"] = effort
+    if current_ai_provider() == OPENAI_COMPAT_PROVIDER:
+        thinking_type = current_ai_thinking_type()
+        if thinking_type != "default":
+            kwargs["extra_body"] = {"thinking": {"type": thinking_type}}
     return kwargs
 
 

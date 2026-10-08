@@ -58,6 +58,7 @@ def get_settings() -> dict:
     from app.services.ai_provider import (
         ai_configured,
         current_ai_model,
+        current_ai_thinking_type,
         current_codex_command,
         current_codex_model,
         current_codex_reasoning_effort,
@@ -90,6 +91,7 @@ def get_settings() -> dict:
         "ai_model": current_ai_model(),
         "ai_openai_model": current_openai_model(),
         "ai_reasoning_effort": current_openai_reasoning_effort(),
+        "ai_thinking_type": current_ai_thinking_type(),
         "ai_codex_model": current_codex_model(),
         "ai_codex_command": current_codex_command(),
         "ai_codex_reasoning_effort": current_codex_reasoning_effort(),
@@ -254,6 +256,7 @@ class AiSettingsIn(BaseModel):
     api_key: str | None = None
     model: str = ""
     reasoning_effort: str = Field(default="high", max_length=64)
+    thinking_type: Literal["default", "enabled", "disabled"] | None = None
     codex_command: str = ""
     codex_reasoning_effort: str = ""
     user_agent: str = ""
@@ -271,6 +274,7 @@ def save_ai_settings(req: AiSettingsIn) -> dict:
         ai_configured,
         current_ai_model,
         current_ai_provider,
+        current_ai_thinking_type,
         current_codex_command,
         current_codex_model,
         current_codex_reasoning_effort,
@@ -315,6 +319,9 @@ def save_ai_settings(req: AiSettingsIn) -> dict:
             settings.ai_model = req.model
         if req.provider == OPENAI_PROVIDER:
             updates["ai_reasoning_effort"] = req.reasoning_effort.strip()
+        if req.provider == "openai_compat" and req.thinking_type is not None:
+            updates["ai_thinking_type"] = req.thinking_type
+            settings.ai_thinking_type = req.thinking_type
     # user_agent 允许清空(回到默认浏览器 UA),故无条件持久化
     updates["ai_user_agent"] = req.user_agent
     settings.ai_user_agent = req.user_agent
@@ -347,6 +354,7 @@ def save_ai_settings(req: AiSettingsIn) -> dict:
         "ai_model": current_ai_model(),
         "ai_openai_model": current_openai_model(),
         "ai_reasoning_effort": current_openai_reasoning_effort(),
+        "ai_thinking_type": current_ai_thinking_type(),
         "ai_codex_model": current_codex_model(),
         "ai_codex_command": current_codex_command(),
         "ai_codex_reasoning_effort": current_codex_reasoning_effort(),
@@ -371,6 +379,7 @@ def clear_ai_settings() -> dict:
         "ai_api_key",
         "ai_model",
         "ai_reasoning_effort",
+        "ai_thinking_type",
         "ai_codex_model",
         "ai_codex_command",
         "ai_codex_reasoning_effort",
@@ -381,6 +390,7 @@ def clear_ai_settings() -> dict:
     settings.ai_base_url = ""
     settings.ai_api_key = ""
     settings.ai_model = ""
+    settings.ai_thinking_type = "default"
     settings.ai_codex_command = "codex"
     settings.ai_codex_reasoning_effort = ""
     settings.ai_max_output_tokens = 16384
