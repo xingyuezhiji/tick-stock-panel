@@ -47,6 +47,7 @@ const BUILTIN_PAGES: NavEntry[] = [
   { id: '/abnormal', label: '异动监控', type: 'builtin', visible: true },
   { id: '/lots', label: '持仓提醒', type: 'builtin', visible: true },
   { id: '/paper', label: '模拟盘', type: 'builtin', visible: true },
+  { id: '/live', label: '实盘', type: 'builtin', visible: true },
   { id: '/signals', label: '信号库', type: 'builtin', visible: true },
   { id: '/review', label: '复盘', type: 'builtin', visible: true },
   { id: '/indices', label: '指数', type: 'builtin', visible: true },
@@ -76,6 +77,7 @@ const ARCH_CLASS: Record<string, { kind: ArchKind; reason: string }> = {
   '/abnormal':       { kind: 'ext', reason: '异动监控视图 — 消费核心数据, 可由扩展页面替换' },
   '/lots':           { kind: 'ext', reason: '持仓提醒视图 — 消费核心数据, 可由扩展页面替换' },
   '/paper':          { kind: 'ext', reason: '模拟盘 — 官方插件化拆分候选 (V3)' },
+  '/live':           { kind: 'ext', reason: '实盘控制台 — 消费策略结果, V1 仅落模拟盘委托' },
   '/signals':        { kind: 'ext', reason: '信号库视图 — 消费核心数据, 可由扩展页面替换' },
   '/review':         { kind: 'ext', reason: '大盘复盘视图 — 消费核心数据, 可由扩展页面替换' },
 }

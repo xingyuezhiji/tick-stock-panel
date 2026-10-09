@@ -1167,6 +1167,92 @@ export interface PaperFill {
   cost_before?: number
 }
 
+// ===== Live (实盘控制台 V1: 手动确认 + 模拟盘执行) =====
+export interface LiveBrokerSummary {
+  id: 'paper' | 'qmt' | 'ptrade' | string
+  label: string
+  enabled: boolean
+}
+
+export interface LiveCandidateRow {
+  symbol: string
+  name?: string
+  rank: number
+  score?: number | null
+  ref_price?: number | null
+  held_qty: number
+  in_position: boolean
+  suggested_action: 'buy' | 'hold'
+  [key: string]: any
+}
+
+export interface LiveHoldingRow extends PaperHolding {
+  name?: string
+  rank?: number | null
+  in_buffer: boolean
+  suggested_action: 'sell' | 'hold'
+  [key: string]: any
+}
+
+export interface LiveStrategyPool {
+  strategy_id: string
+  strategy_name: string
+  as_of: string
+  account_id: string
+  asset_type: string
+  timeframe: string
+  top_n: number
+  buffer_n: number
+  total: number
+  buy_symbols: string[]
+  buffer_symbols: string[]
+  candidates: LiveCandidateRow[]
+  holdings: LiveHoldingRow[]
+  overview: PaperOverview
+}
+
+export interface LiveOrderSkipped {
+  symbol: string
+  reason: 'already_held' | 'not_in_buy_pool' | 'still_in_buffer' | 'no_available_qty' | 'broker_disabled' | 'invalid_symbol' | string
+  message?: string
+}
+
+export interface LiveOrderError {
+  symbol?: string
+  reason: string
+  message: string
+}
+
+export interface LiveOrderBatchResult {
+  broker: string
+  created: PaperOrder[]
+  skipped: LiveOrderSkipped[]
+  errors: LiveOrderError[]
+}
+
+export interface LivePoolParams {
+  strategy_id: string
+  account?: string
+  broker?: string
+  as_of?: string
+  asset_type?: 'stock' | 'etf'
+  timeframe?: '1d' | '1m'
+  top_n?: number
+  buffer_n?: number
+}
+
+export interface LiveBuySelectedRequest extends LivePoolParams {
+  symbols: string[]
+  size_mode?: 'fixed_amount'
+  amount_per_symbol: number
+  order_type: 'market' | 'next_open' | 'close'
+}
+
+export interface LiveSellOutOfBufferRequest extends LivePoolParams {
+  symbols: string[]
+  order_type: 'market' | 'next_open' | 'close'
+}
+
 export interface VDBasicFilter {
   price_min?: number | null                 // 股价下限 (元)
   price_max?: number | null                 // 股价上限 (元)
@@ -3857,6 +3943,39 @@ export const api = {
 
   paperAutoRuleDelete: (id: string, account?: string) =>
     request<{ ok: boolean }>(accUrl(`/api/paper/auto_rules/${encodeURIComponent(id)}`, account), { method: 'DELETE' }),
+
+  // ===== Live (实盘控制台 V1: 策略候选池 + 模拟盘委托) =====
+  liveBrokers: () =>
+    request<{ brokers: LiveBrokerSummary[] }>('/api/live/brokers'),
+
+  liveStrategyPool: (params: LivePoolParams) => {
+    const p = new URLSearchParams()
+    p.set('strategy_id', params.strategy_id)
+    if (params.account) p.set('account', params.account)
+    if (params.broker) p.set('broker', params.broker)
+    if (params.as_of) p.set('as_of', params.as_of)
+    if (params.asset_type) p.set('asset_type', params.asset_type)
+    if (params.timeframe) p.set('timeframe', params.timeframe)
+    if (params.top_n) p.set('top_n', String(params.top_n))
+    if (params.buffer_n) p.set('buffer_n', String(params.buffer_n))
+    return request<LiveStrategyPool>(`/api/live/strategy-pool?${p.toString()}`, {
+      timeoutMs: COMPUTE_REQUEST_TIMEOUT_MS,
+    })
+  },
+
+  liveBuySelected: (body: LiveBuySelectedRequest) =>
+    request<LiveOrderBatchResult>('/api/live/orders/buy-selected', {
+      method: 'POST',
+      timeoutMs: COMPUTE_REQUEST_TIMEOUT_MS,
+      body: JSON.stringify(body),
+    }),
+
+  liveSellOutOfBuffer: (body: LiveSellOutOfBufferRequest) =>
+    request<LiveOrderBatchResult>('/api/live/orders/sell-out-of-buffer', {
+      method: 'POST',
+      timeoutMs: COMPUTE_REQUEST_TIMEOUT_MS,
+      body: JSON.stringify(body),
+    }),
 
   /** 模拟触发 ladder 封单监控 (Dev 调试, 不落盘不推送) */
   monitorRuleTestLadder: () =>

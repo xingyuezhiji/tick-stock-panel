@@ -25,6 +25,7 @@ from app.api import (
     indices,
     intraday,
     kline,
+    live,
     lots,
     market_recap,
     mining,
@@ -512,6 +513,7 @@ app.include_router(intraday.router)
 app.include_router(indices.router)
 app.include_router(overview.router)
 app.include_router(paper.router)
+app.include_router(live.router)
 app.include_router(abnormal.router)
 app.include_router(regime.router)
 app.include_router(analysis.router)

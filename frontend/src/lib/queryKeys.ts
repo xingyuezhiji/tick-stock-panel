@@ -117,6 +117,9 @@ export const QK = {
   paperStats:           (acc: string) => ['paper', 'stats', acc] as const,
   paperCompare:         ['paper', 'compare'] as const,
   paperAutoRules:       (acc: string) => ['paper', 'auto-rules', acc] as const,
+  liveBrokers:          ['live', 'brokers'] as const,
+  liveStrategyPool:     (strategyId: string, account: string, broker: string, asOf: string, topN: number, bufferN: number) =>
+                          ['live', 'strategy-pool', strategyId, account, broker, asOf, topN, bufferN] as const,
   alerts:               (source?: string) => ['alerts', source ?? ''] as const,
 
   // AI 大盘复盘
