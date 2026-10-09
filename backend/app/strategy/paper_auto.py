@@ -1,7 +1,8 @@
 """自动跟单规则域 — 监控事件触发模拟盘自动下单 (V2)。
 
 规则匹配: 事件 source=="strategy" 且 strategy_id 相等 (跟策略), 或 rule_id 相等
-(跟任意监控规则, 含信号/价格规则)。仓位: 固定金额 或 账户权益百分比。
+(跟任意监控规则, 含信号/价格规则)。方向可固定为 buy/sell, 也可 follow 跟随
+策略事件类型自动映射买入/卖出。仓位: 固定金额 或 账户权益百分比。
 冷却: 同规则同 symbol 最近一次自动下单后 N 个交易日内不再触发 (按订单
 created_at 日期判断, 无独立状态文件 — 可由订单列表重放推导)。
 
@@ -27,6 +28,11 @@ from app.strategy import paper
 
 logger = logging.getLogger(__name__)
 
+FOLLOW_SIDE = "follow"
+VALID_SIDES = ("buy", "sell", FOLLOW_SIDE)
+BUY_EVENT_TYPES = {"buy_signal", "pool_entry"}
+SELL_EVENT_TYPES = {"sell_signal", "pool_exit"}
+
 
 def _dir(data_dir: Path, account_id: str) -> Path:
     d = paper._root(data_dir, account_id) / "auto_rules"
@@ -50,7 +56,7 @@ def validate_rule(rule: dict) -> None:
         raise ValueError(f"match_kind 非法: {rule.get('match_kind')!r} (应为 strategy / rule)")
     if not (rule.get("match_id") or "").strip():
         raise ValueError("match_id 不能为空")
-    if rule.get("side") not in ("buy", "sell"):
+    if rule.get("side") not in VALID_SIDES:
         raise ValueError(f"side 非法: {rule.get('side')!r}")
     if rule.get("size_mode") not in ("fixed_amount", "pct_equity"):
         raise ValueError(f"size_mode 非法: {rule.get('size_mode')!r}")
@@ -127,6 +133,24 @@ def _matches(rule: dict, ev: dict) -> bool:
     return ev.get("rule_id") == rule["match_id"]
 
 
+def _resolve_order_side(rule: dict, ev: dict) -> str | None:
+    """Return concrete order side.
+
+    side=follow follows strategy/monitor event direction:
+    buy_signal/pool_entry -> buy, sell_signal/pool_exit -> sell.
+    Non-directional events are intentionally ignored to avoid accidental orders.
+    """
+    side = rule.get("side", "buy")
+    if side in ("buy", "sell"):
+        return side
+    ev_type = str(ev.get("type") or "")
+    if ev_type in BUY_EVENT_TYPES:
+        return "buy"
+    if ev_type in SELL_EVENT_TYPES:
+        return "sell"
+    return None
+
+
 def _in_cooldown(data_dir: Path, rule: dict, symbol: str, cooldown_days: int, account_id: str) -> bool:
     """同规则同 symbol 最近一次自动下单是否仍在冷却期 (按日历日, 含当日)。"""
     if cooldown_days <= 0:
@@ -181,6 +205,10 @@ def on_rule_events(data_dir: Path, events: list[dict], account_id: str = paper.D
             for rule in rules:
                 if not _matches(rule, ev):
                     continue
+                side = _resolve_order_side(rule, ev)
+                if side is None:
+                    logger.info("paper auto %s: 事件 %s 无法推导买卖方向, 跳过", rule["name"], ev.get("type"))
+                    continue
                 if _in_cooldown(data_dir, rule, symbol, int(rule.get("cooldown_days", 0)), account_id):
                     continue
                 qty = _sizing_qty(data_dir, rule, float(price), account_id)
@@ -188,7 +216,7 @@ def on_rule_events(data_dir: Path, events: list[dict], account_id: str = paper.D
                     logger.info("paper auto %s: %s 金额不足以一手 (价 %s)", rule["name"], symbol, price)
                     continue
                 order, err = paper.create_order(
-                    data_dir, symbol, rule["side"],
+                    data_dir, symbol, side,
                     account_id=account_id,
                     qty=qty,
                     order_type=rule["order_type"],
@@ -199,7 +227,7 @@ def on_rule_events(data_dir: Path, events: list[dict], account_id: str = paper.D
                     logger.info("paper auto %s: %s 下单被拒: %s", rule["name"], symbol, err)
                     continue
                 created.append(order)
-                logger.info("paper auto %s: %s 触发 %s %d 股 (%s)", rule["name"], symbol, rule["side"], qty, order["id"])
+                logger.info("paper auto %s: %s 触发 %s %d 股 (%s)", rule["name"], symbol, side, qty, order["id"])
     return created
 
 

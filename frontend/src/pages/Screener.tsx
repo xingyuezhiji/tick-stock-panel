@@ -41,6 +41,9 @@ import {
 // 获取策略为占位功能, 暂时隐藏入口; 恢复时改回 true
 const SHOW_STRATEGY_STORE = false
 
+const screenerResultStrategyId = (item: ScreenerResult | null | undefined) =>
+  item?.strategy ?? item?.strategy_id ?? null
+
 export function Screener() {
   const [assetType, setAssetType] = useState<'stock' | 'etf'>('stock')
   // 周期显示筛选: 全部 / 日线 / 分钟 — 只过滤卡片显示, 不影响池和执行;
@@ -102,6 +105,7 @@ export function Screener() {
   const filterMap = useRef<Map<string, ScreenerFilterType>>(new Map())
   const runAllDateRef = useRef<string | null>(null)
   const minuteRunDateRef = useRef<string | null>(null)
+  const singleRunDateRef = useRef<string | null>(null)
   const qc = useQueryClient()
 
   // 结果列配置 — 默认内置列，异步合并后端/localStorage 偏好
@@ -184,7 +188,7 @@ export function Screener() {
 
   const singleCachedQuery = useQuery({
     queryKey: QK.screenerCachedResult(activeStrategy ?? '', asOf, extColumnsParam),
-    queryFn: () => api.screenerCachedResult(activeStrategy!, extColumnsParam || undefined),
+    queryFn: () => api.screenerCachedResult(activeStrategy!, asOf || undefined, extColumnsParam || undefined),
     enabled: assetType === 'stock'
       && activeStrategyTimeframe === '1d'
       && !showAll
@@ -389,7 +393,7 @@ export function Screener() {
   // 当前单策略缓存更新后同步明细；参数保存的强制重算结果仍由 run 直接覆盖。
   useEffect(() => {
     const cached = singleCachedQuery.data?.result
-    if (!cached || showAll || cached.strategy !== activeStrategy || cached.as_of !== asOf) return
+    if (!cached || showAll || screenerResultStrategyId(cached) !== activeStrategy || cached.as_of !== asOf) return
     setResult(cached)
     if (activeStrategy) {
       setHitCounts(prev => ({ ...prev, [activeStrategy]: cached.total }))
@@ -570,6 +574,7 @@ export function Screener() {
     // 与分钟 runAll 互斥: 后端并发 run_all 会崩 Numba, 分钟在跑时先让路,
     // 其结束后 isPending 翻转, 本 effect 重新评估
     if (assetType !== 'stock' || tfFilter === '1m') return
+    if (!showAll && activeStrategy) return
     if (runAllMinute.isPending) return
     if (!asOf || strategyPresets.length === 0 || !summaryQuery.isSuccess || runAll.isPending || dailyPoolIds.length === 0) return
     const runKey = `${asOf}|${dailyPoolIds.join(',')}`
@@ -583,7 +588,7 @@ export function Screener() {
     if (!screenerAutoRun) return
     runAllDateRef.current = runKey
     requestRunAll({ date: asOf, strategyIds: missingStrategyIds })
-  }, [asOf, strategyPresets.length, summaryQuery.isSuccess, dailyPoolIds, cacheCoversPool, missingStrategyIds, screenerAutoRun, assetType, tfFilter, runAll.isPending, runAllMinute.isPending, requestRunAll])
+  }, [asOf, strategyPresets.length, summaryQuery.isSuccess, dailyPoolIds, cacheCoversPool, missingStrategyIds, screenerAutoRun, assetType, tfFilter, showAll, activeStrategy, runAll.isPending, runAllMinute.isPending, requestRunAll])
 
   // 分钟策略自动计算: 结果不落盘后缓存, 每次进入页面/池变化后异步跑一轮点亮卡片。
   // 与日线 runAll 串行 (并发 run_all 会崩 Numba); 分钟卡片不可见 (日线视图) 时不白算。
@@ -613,11 +618,34 @@ export function Screener() {
     },
   })
 
+  // 单策略历史日期: 盘后缓存通常只保存最新日。切换历史日期后, 若缓存不匹配,
+  // 自动按当前 asOf 实时重算该策略, 避免页面误显示「无命中」。
+  useEffect(() => {
+    if (assetType !== 'stock') return
+    if (activeStrategyTimeframe !== '1d') return
+    if (showAll || !activeStrategy || !asOf) return
+    if (summaryQuery.data?.results[activeStrategy]?.as_of === asOf) return
+    if (run.isPending) return
+    const runKey = `${activeStrategy}|${asOf}|${assetType}|${extColumnsParam}`
+    if (singleRunDateRef.current === runKey) return
+    singleRunDateRef.current = runKey
+    run.mutate({ id: activeStrategy, date: asOf, timeframe: '1d' })
+  }, [
+    activeStrategy,
+    activeStrategyTimeframe,
+    asOf,
+    assetType,
+    extColumnsParam,
+    showAll,
+    summaryQuery.data,
+    run,
+  ])
+
   const handleRun = (s: ScreenerStrategy) => {
     handleStrategySwitch(s.id)
     setActiveStrategy(s.id)
     setShowAll(false)
-    if (result?.strategy !== s.id || result.as_of !== asOf) setResult(null)
+    if (screenerResultStrategyId(result) !== s.id || result?.as_of !== asOf) setResult(null)
     const tf = s.timeframes?.includes('1m') ? '1m' as const : '1d' as const
     // ETF 模式无股票盘后缓存、分钟策略走本地分钟分区 → 始终实时单跑。
     // 传空日期让后端用自身的最新交易日 (ETF 与分钟分区跟股票 enriched 可能不同日)。
@@ -627,6 +655,7 @@ export function Screener() {
     }
     // 摘要命中时由 singleCachedQuery 按需加载明细；缺失时才单独计算。
     if (summaryQuery.data?.results[s.id]?.as_of === asOf || runAll.isPending) return
+    singleRunDateRef.current = `${s.id}|${asOf}|${assetType}|${extColumnsParam}`
     run.mutate({ id: s.id, date: asOf, timeframe: tf })
   }
 
@@ -634,6 +663,7 @@ export function Screener() {
   const handleDateChange = (newDate: string) => {
     setAsOf(newDate)
     runAllDateRef.current = null
+    singleRunDateRef.current = null
     setResult(null)
   }
 
@@ -948,7 +978,7 @@ export function Screener() {
 
           {(showAll ? allRows.length > 0 : !!result) && (
             <motion.div
-              key={showAll ? `all-${asOf}` : `${result!.as_of}-${result!.strategy}`}
+              key={showAll ? `all-${asOf}` : `${result!.as_of}-${screenerResultStrategyId(result)}`}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}

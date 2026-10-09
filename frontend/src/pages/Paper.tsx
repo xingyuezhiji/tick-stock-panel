@@ -25,6 +25,12 @@ const ORDER_TYPE_LABEL: Record<string, string> = {
   close: '当日收盘',
 }
 
+const AUTO_SIDE_LABEL: Record<string, string> = {
+  follow: '跟随',
+  buy: '买',
+  sell: '卖',
+}
+
 const STATUS_LABEL: Record<string, string> = {
   pending: '待成交',
   filled: '已成交',
@@ -877,7 +883,10 @@ function AutoRulesPanel({ acc }: { acc: string }) {
               <span className="w-28 shrink-0 truncate font-medium">{r.name}</span>
               <span className="w-20 shrink-0 text-muted">{r.match_kind === 'strategy' ? '跟策略' : '跟规则'}</span>
               <span className="w-32 shrink-0 truncate font-mono text-[11px] text-muted" title={r.match_id}>{r.match_id}</span>
-              <span className={cn('w-8 shrink-0 font-medium', r.side === 'buy' ? 'text-bull' : 'text-bear')}>{r.side === 'buy' ? '买' : '卖'}</span>
+              <span className={cn(
+                'w-10 shrink-0 font-medium',
+                r.side === 'buy' ? 'text-bull' : r.side === 'sell' ? 'text-bear' : 'text-accent',
+              )}>{AUTO_SIDE_LABEL[r.side] ?? r.side}</span>
               <span className="w-24 shrink-0 font-mono text-[11px] text-muted">
                 {r.size_mode === 'fixed_amount' ? fmtMoney(r.size_value, 0) : `${r.size_value}% 权益`}
               </span>
@@ -904,7 +913,7 @@ function AutoRuleForm({ acc, onDone, onCancel }: { acc: string; onDone: () => vo
   const [name, setName] = useState('')
   const [matchKind, setMatchKind] = useState<'strategy' | 'rule'>('strategy')
   const [matchId, setMatchId] = useState('')
-  const [side, setSide] = useState<'buy' | 'sell'>('buy')
+  const [side, setSide] = useState<'follow' | 'buy' | 'sell'>('follow')
   const [sizeMode, setSizeMode] = useState<'fixed_amount' | 'pct_equity'>('fixed_amount')
   const [sizeValue, setSizeValue] = useState('10000')
   const [orderType, setOrderType] = useState<'market' | 'next_open' | 'close'>('next_open')
@@ -998,14 +1007,23 @@ function AutoRuleForm({ acc, onDone, onCancel }: { acc: string; onDone: () => vo
         </div>
         <div>
           <label className="text-[11px] text-muted">方向</label>
-          <div className="mt-1 flex gap-1.5">
-            {(['buy', 'sell'] as const).map(sd => (
+          <div className="mt-1 grid grid-cols-3 gap-1.5">
+            {(['follow', 'buy', 'sell'] as const).map(sd => (
               <button key={sd} onClick={() => setSide(sd)}
                 className={cn('flex-1 rounded-btn border py-1 text-[11px] font-medium transition-colors',
-                  side === sd ? (sd === 'buy' ? 'border-bull/50 bg-bull/10 text-bull' : 'border-bear/50 bg-bear/10 text-bear') : 'border-border text-muted')}>
-                {sd === 'buy' ? '买入' : '卖出'}
+                  side === sd
+                    ? sd === 'buy'
+                      ? 'border-bull/50 bg-bull/10 text-bull'
+                      : sd === 'sell'
+                        ? 'border-bear/50 bg-bear/10 text-bear'
+                        : 'border-accent/40 bg-accent/10 text-accent'
+                    : 'border-border text-muted')}>
+                {sd === 'follow' ? '跟随信号' : sd === 'buy' ? '买入' : '卖出'}
               </button>
             ))}
+          </div>
+          <div className="mt-1 text-[10px] leading-relaxed text-muted">
+            跟随信号会把买入信号/入池转成买入, 卖出信号/出池转成卖出。
           </div>
         </div>
         <div>

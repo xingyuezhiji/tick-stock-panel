@@ -450,12 +450,20 @@ def get_cached_summary(request: Request):
 def get_cached_result(
     strategy_id: str,
     request: Request,
+    as_of: Optional[date] = Query(None, description="要求缓存结果必须匹配该日期"),
     ext_columns: Optional[str] = Query(None, description="逗号分隔: config_id.field_name"),
 ):
     """按需返回单个策略的完整明细及其今日失效行。"""
     cached = _cached_with_realtime(request)
     raw_result = (cached.get("results") or {}).get(strategy_id)
     if not isinstance(raw_result, dict):
+        return {
+            "result": None,
+            "today_ever_rows": None,
+            "strategy_ids_by_symbol": {},
+            "updated_at": cached.get("updated_at"),
+        }
+    if as_of is not None and raw_result.get("as_of") != str(as_of):
         return {
             "result": None,
             "today_ever_rows": None,

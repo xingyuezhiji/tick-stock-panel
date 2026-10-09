@@ -402,7 +402,8 @@ export interface StrategyLoadError {
 
 export interface ScreenerResult {
   as_of: string
-  strategy: string | null
+  strategy?: string | null
+  strategy_id?: string | null
   rows: any[]
   total: number
   elapsed_ms: number
@@ -1141,7 +1142,7 @@ export interface PaperAutoRule {
   name: string
   match_kind: 'strategy' | 'rule'
   match_id: string
-  side: 'buy' | 'sell'
+  side: 'buy' | 'sell' | 'follow'
   size_mode: 'fixed_amount' | 'pct_equity'
   size_value: number
   order_type: 'market' | 'next_open' | 'close'
@@ -2917,12 +2918,15 @@ export const api = {
     ),
   screenerCachedSummary: () =>
     request<ScreenerCachedSummary>('/api/screener/cached-summary'),
-  screenerCachedResult: (strategyId: string, extColumns?: string) =>
-    request<ScreenerCachedResult>(
-      extColumns
-        ? `/api/screener/cached-result/${encodeURIComponent(strategyId)}?ext_columns=${encodeURIComponent(extColumns)}`
-        : `/api/screener/cached-result/${encodeURIComponent(strategyId)}`,
-    ),
+  screenerCachedResult: (strategyId: string, asOf?: string, extColumns?: string) => {
+    const params = new URLSearchParams()
+    if (asOf) params.set('as_of', asOf)
+    if (extColumns) params.set('ext_columns', extColumns)
+    const query = params.toString()
+    return request<ScreenerCachedResult>(
+      `/api/screener/cached-result/${encodeURIComponent(strategyId)}${query ? `?${query}` : ''}`,
+    )
+  },
   screenerCached: (extColumns?: string) =>
     request<{ as_of: string | null; results: Record<string, { total: number; as_of: string; rows: any[] }>; today_ever_matched: Record<string, string[]> | null; today_ever_rows: Record<string, Record<string, any>> | null; updated_at: number | null }>(
       extColumns

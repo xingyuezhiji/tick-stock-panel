@@ -284,7 +284,7 @@ class AutoRuleModel(BaseModel):
     name: str
     match_kind: str                 # strategy / rule
     match_id: str
-    side: str = "buy"
+    side: str = "follow"            # buy / sell / follow
     size_mode: str = "fixed_amount" # fixed_amount / pct_equity
     size_value: float
     order_type: str = "next_open"
