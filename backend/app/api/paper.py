@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Query, Request
@@ -18,6 +19,20 @@ from app.strategy import paper
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/paper", tags=["paper"])
+
+_BARE_A_SYMBOL_RE = re.compile(r"^\d{6}$")
+
+
+def _normalize_order_symbol(symbol: str) -> str:
+    """Normalize common A-share bare codes to app symbols used by local market data."""
+    value = (symbol or "").strip().upper()
+    if not _BARE_A_SYMBOL_RE.match(value):
+        return value
+    if value.startswith(("4", "8")):
+        return f"{value}.BJ"
+    if value.startswith(("5", "6", "9")):
+        return f"{value}.SH"
+    return f"{value}.SZ"
 
 
 def _data_dir(request: Request) -> Path:
@@ -76,7 +91,7 @@ def _last_close(data_dir: Path, symbol: str, asset_type: str) -> float | None:
     try:
         import polars as pl
         df = (
-            pl.scan_parquet((base / "**" / "*.parquet").as_posix())
+            pl.scan_parquet((base / "**" / "*.parquet").as_posix(), extra_columns="ignore")
             .filter(pl.col("symbol") == symbol)
             .sort("date")
             .select(pl.col("close").last())
@@ -154,12 +169,13 @@ def overview(request: Request, account: str = Query(paper.DEFAULT_ACCOUNT_ID)):
 def create_order(request: Request, body: OrderModel, account: str = Query(paper.DEFAULT_ACCOUNT_ID)):
     data_dir = _data_dir(request)
     acc_id = _acc(request, account)
-    asset_type = _resolve_asset_type(request, body.symbol)
+    symbol = _normalize_order_symbol(body.symbol)
+    asset_type = _resolve_asset_type(request, symbol)
     ref_price = body.ref_price
     if ref_price is None:
-        ref_price = _last_close(data_dir, body.symbol, asset_type)
+        ref_price = _last_close(data_dir, symbol, asset_type)
     order, err = paper.create_order(
-        data_dir, body.symbol, body.side,
+        data_dir, symbol, body.side,
         account_id=acc_id,
         qty=body.qty, amount=body.amount,
         order_type=body.order_type, asset_type=asset_type, ref_price=ref_price,
