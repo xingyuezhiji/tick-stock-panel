@@ -237,6 +237,8 @@ def _feature_map(market: MarketDataMatrix, params: dict) -> tuple[dict[str, np.n
     vwap_dev = _safe_ratio(market.close, vwap20) - 1.0
     vol_ret_corr = _matrix_rolling_corr(ret_raw, market.volume, valid, 20)
     ma20_bias = _safe_ratio(market.close, ma20) - 1.0
+    amp1 = _safe_ratio(market.high - market.low, market.close)
+    amp20 = valid_rolling_mean(amp1, valid, 20)
     prev_close_raw = _delay1(market.close)
     true_range = np.maximum(
         market.high - market.low,
@@ -270,6 +272,7 @@ def _feature_map(market: MarketDataMatrix, params: dict) -> tuple[dict[str, np.n
         "CV_CORR20_LOW": -_cs_robust_norm(corr_cv20),
         "CV_CORR30_LOW": -_cs_robust_norm(corr_cv30),
         "MA60_BIAS_LOW": -_cs_robust_norm(ma60_bias),
+        "AMP20_LOW": -_cs_robust_norm(amp20),
         "WR_DIFF": _cs_robust_norm(wr_diff),
         "RSI14": _cs_robust_norm(rsi14),
         "RSV": _cs_robust_norm(rsv),
@@ -298,6 +301,7 @@ def _feature_map(market: MarketDataMatrix, params: dict) -> tuple[dict[str, np.n
         & np.isfinite(corr_cv20)
         & np.isfinite(corr_cv30)
         & np.isfinite(ma60_bias)
+        & np.isfinite(amp20)
         & (listed_days >= min_listed)
         & (avg_amount >= min_avg_amount)
     )

@@ -1,0 +1,58 @@
+[
+  {
+    "strategy_id": "ai_alphagpt_round937_c02_amp_gate_jump",
+    "grid": "stop10_trail12_exp50_pos5",
+    "run_id": "5a2a7ba7d3",
+    "error": null,
+    "total_return": 1.183,
+    "annual_return": 0.499,
+    "max_drawdown": -0.0916,
+    "sharpe": 2.77,
+    "sortino": 4.25,
+    "calmar": 5.45,
+    "n_trades": 311,
+    "final_equity": 2183010.32
+  },
+  {
+    "strategy_id": "ai_alphagpt_round937_c02_amp_gate_jump",
+    "grid": "stop6_trail8_exp40_pos5",
+    "run_id": "a852791782",
+    "error": null,
+    "total_return": 0.8711,
+    "annual_return": 0.3839,
+    "max_drawdown": -0.0649,
+    "sharpe": 2.71,
+    "sortino": 4.33,
+    "calmar": 5.91,
+    "n_trades": 376,
+    "final_equity": 1871145.68
+  },
+  {
+    "strategy_id": "ai_alphagpt_round935_c12_jump_delay",
+    "grid": "stop10_trail12_exp50_pos5",
+    "run_id": "685412128a",
+    "error": null,
+    "total_return": 1.9123,
+    "annual_return": 0.7407,
+    "max_drawdown": -0.1371,
+    "sharpe": 3.3,
+    "sortino": 5.68,
+    "calmar": 5.4,
+    "n_trades": 394,
+    "final_equity": 2912330.26
+  },
+  {
+    "strategy_id": "ai_alphagpt_round935_c12_jump_delay",
+    "grid": "stop6_trail8_exp40_pos5",
+    "run_id": "f04fa32ea8",
+    "error": null,
+    "total_return": 1.3776,
+    "annual_return": 0.5669,
+    "max_drawdown": -0.0992,
+    "sharpe": 3.54,
+    "sortino": 6.22,
+    "calmar": 5.72,
+    "n_trades": 420,
+    "final_equity": 2377612.25
+  }
+]

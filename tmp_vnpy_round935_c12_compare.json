@@ -1,0 +1,4266 @@
+{
+  "environment": {
+    "python": "vnpy310",
+    "vnpy_version": "3.9.4",
+    "vnpy_bar_sample": {
+      "symbol": "000001",
+      "exchange": "SZSE",
+      "interval": "d",
+      "gateway_name": "TSP_PARQUET"
+    }
+  },
+  "strategy_id": "ai_alphagpt_round935_c12_jump_delay",
+  "grid": "stop10_trail12_exp50_pos5",
+  "period": {
+    "start": "2025-09-30",
+    "end": "2026-09-30",
+    "warmup_days": 150
+  },
+  "vnpy_adapter": {
+    "stats": {
+      "total_return": 1.2246,
+      "annual_return": 1.2993,
+      "max_drawdown": -0.0671,
+      "sharpe": 4.66,
+      "sortino": 9.26,
+      "win_rate": 0.6762,
+      "profit_factor": 1.71,
+      "n_trades": 210,
+      "final_equity": 2224595.82,
+      "avg_exposure": 0.463,
+      "max_exposure": 0.5361
+    },
+    "equity_curve": [
+      {
+        "date": "2025-09-30",
+        "value": 1000000.0,
+        "cash": 1000000.0,
+        "positions": 0,
+        "exposure": 0.0
+      },
+      {
+        "date": "2025-10-09",
+        "value": 1006702.09,
+        "cash": 504744.66,
+        "positions": 5,
+        "exposure": 0.4986
+      },
+      {
+        "date": "2025-10-10",
+        "value": 1017039.23,
+        "cash": 504744.66,
+        "positions": 5,
+        "exposure": 0.5037
+      },
+      {
+        "date": "2025-10-13",
+        "value": 1023715.84,
+        "cash": 516611.94,
+        "positions": 5,
+        "exposure": 0.4954
+      },
+      {
+        "date": "2025-10-14",
+        "value": 1041333.11,
+        "cash": 516611.94,
+        "positions": 5,
+        "exposure": 0.5039
+      },
+      {
+        "date": "2025-10-15",
+        "value": 1041970.43,
+        "cash": 516611.94,
+        "positions": 5,
+        "exposure": 0.5042
+      },
+      {
+        "date": "2025-10-16",
+        "value": 1043944.52,
+        "cash": 632888.23,
+        "positions": 4,
+        "exposure": 0.3938
+      },
+      {
+        "date": "2025-10-17",
+        "value": 1045547.28,
+        "cash": 632888.23,
+        "positions": 4,
+        "exposure": 0.3947
+      },
+      {
+        "date": "2025-10-20",
+        "value": 1050413.85,
+        "cash": 529354.65,
+        "positions": 5,
+        "exposure": 0.4961
+      },
+      {
+        "date": "2025-10-21",
+        "value": 1059131.65,
+        "cash": 529354.65,
+        "positions": 5,
+        "exposure": 0.5002
+      },
+      {
+        "date": "2025-10-22",
+        "value": 1059284.79,
+        "cash": 529354.65,
+        "positions": 5,
+        "exposure": 0.5003
+      },
+      {
+        "date": "2025-10-23",
+        "value": 1053228.14,
+        "cash": 529354.65,
+        "positions": 5,
+        "exposure": 0.4974
+      },
+      {
+        "date": "2025-10-24",
+        "value": 1081246.26,
+        "cash": 529354.65,
+        "positions": 5,
+        "exposure": 0.5104
+      },
+      {
+        "date": "2025-10-27",
+        "value": 1062974.19,
+        "cash": 538507.47,
+        "positions": 5,
+        "exposure": 0.4934
+      },
+      {
+        "date": "2025-10-28",
+        "value": 1068218.05,
+        "cash": 538507.47,
+        "positions": 5,
+        "exposure": 0.4959
+      },
+      {
+        "date": "2025-10-29",
+        "value": 1068490.25,
+        "cash": 538507.47,
+        "positions": 5,
+        "exposure": 0.496
+      },
+      {
+        "date": "2025-10-30",
+        "value": 1061718.44,
+        "cash": 538507.47,
+        "positions": 5,
+        "exposure": 0.4928
+      },
+      {
+        "date": "2025-10-31",
+        "value": 1087001.25,
+        "cash": 538507.47,
+        "positions": 5,
+        "exposure": 0.5046
+      },
+      {
+        "date": "2025-11-03",
+        "value": 1091061.17,
+        "cash": 553790.05,
+        "positions": 5,
+        "exposure": 0.4924
+      },
+      {
+        "date": "2025-11-04",
+        "value": 1082262.66,
+        "cash": 553790.05,
+        "positions": 5,
+        "exposure": 0.4883
+      },
+      {
+        "date": "2025-11-05",
+        "value": 1081229.92,
+        "cash": 553790.05,
+        "positions": 5,
+        "exposure": 0.4878
+      },
+      {
+        "date": "2025-11-06",
+        "value": 1082437.32,
+        "cash": 553790.05,
+        "positions": 5,
+        "exposure": 0.4884
+      },
+      {
+        "date": "2025-11-07",
+        "value": 1085778.47,
+        "cash": 553790.05,
+        "positions": 5,
+        "exposure": 0.49
+      },
+      {
+        "date": "2025-11-10",
+        "value": 1099600.79,
+        "cash": 551683.76,
+        "positions": 5,
+        "exposure": 0.4983
+      },
+      {
+        "date": "2025-11-11",
+        "value": 1109251.54,
+        "cash": 551683.76,
+        "positions": 5,
+        "exposure": 0.5027
+      },
+      {
+        "date": "2025-11-12",
+        "value": 1114624.26,
+        "cash": 551683.76,
+        "positions": 5,
+        "exposure": 0.505
+      },
+      {
+        "date": "2025-11-13",
+        "value": 1130305.97,
+        "cash": 551683.76,
+        "positions": 5,
+        "exposure": 0.5119
+      },
+      {
+        "date": "2025-11-14",
+        "value": 1127705.32,
+        "cash": 648232.26,
+        "positions": 4,
+        "exposure": 0.4252
+      },
+      {
+        "date": "2025-11-17",
+        "value": 1124812.12,
+        "cash": 561347.24,
+        "positions": 5,
+        "exposure": 0.5009
+      },
+      {
+        "date": "2025-11-18",
+        "value": 1162813.48,
+        "cash": 561347.24,
+        "positions": 5,
+        "exposure": 0.5173
+      },
+      {
+        "date": "2025-11-19",
+        "value": 1163714.78,
+        "cash": 561347.24,
+        "positions": 5,
+        "exposure": 0.5176
+      },
+      {
+        "date": "2025-11-20",
+        "value": 1157187.51,
+        "cash": 683339.22,
+        "positions": 4,
+        "exposure": 0.4095
+      },
+      {
+        "date": "2025-11-21",
+        "value": 1152382.28,
+        "cash": 683339.22,
+        "positions": 4,
+        "exposure": 0.407
+      },
+      {
+        "date": "2025-11-24",
+        "value": 1169439.02,
+        "cash": 583740.25,
+        "positions": 5,
+        "exposure": 0.5008
+      },
+      {
+        "date": "2025-11-25",
+        "value": 1177677.29,
+        "cash": 583740.25,
+        "positions": 5,
+        "exposure": 0.5043
+      },
+      {
+        "date": "2025-11-26",
+        "value": 1179577.8,
+        "cash": 583740.25,
+        "positions": 5,
+        "exposure": 0.5051
+      },
+      {
+        "date": "2025-11-27",
+        "value": 1180090.15,
+        "cash": 583740.25,
+        "positions": 5,
+        "exposure": 0.5053
+      },
+      {
+        "date": "2025-11-28",
+        "value": 1184427.58,
+        "cash": 583740.25,
+        "positions": 5,
+        "exposure": 0.5072
+      },
+      {
+        "date": "2025-12-01",
+        "value": 1198763.66,
+        "cash": 593902.64,
+        "positions": 5,
+        "exposure": 0.5046
+      },
+      {
+        "date": "2025-12-02",
+        "value": 1202336.19,
+        "cash": 593902.64,
+        "positions": 5,
+        "exposure": 0.506
+      },
+      {
+        "date": "2025-12-03",
+        "value": 1202192.16,
+        "cash": 593902.64,
+        "positions": 5,
+        "exposure": 0.506
+      },
+      {
+        "date": "2025-12-04",
+        "value": 1219237.62,
+        "cash": 593902.64,
+        "positions": 5,
+        "exposure": 0.5129
+      },
+      {
+        "date": "2025-12-05",
+        "value": 1219260.2,
+        "cash": 593902.64,
+        "positions": 5,
+        "exposure": 0.5129
+      },
+      {
+        "date": "2025-12-08",
+        "value": 1236560.86,
+        "cash": 628122.42,
+        "positions": 5,
+        "exposure": 0.492
+      },
+      {
+        "date": "2025-12-09",
+        "value": 1248555.27,
+        "cash": 628122.42,
+        "positions": 5,
+        "exposure": 0.4969
+      },
+      {
+        "date": "2025-12-10",
+        "value": 1248909.45,
+        "cash": 628122.42,
+        "positions": 5,
+        "exposure": 0.4971
+      },
+      {
+        "date": "2025-12-11",
+        "value": 1228776.83,
+        "cash": 628122.42,
+        "positions": 5,
+        "exposure": 0.4888
+      },
+      {
+        "date": "2025-12-12",
+        "value": 1241459.5,
+        "cash": 741641.33,
+        "positions": 4,
+        "exposure": 0.4026
+      },
+      {
+        "date": "2025-12-15",
+        "value": 1239435.44,
+        "cash": 633459.64,
+        "positions": 5,
+        "exposure": 0.4889
+      },
+      {
+        "date": "2025-12-16",
+        "value": 1230338.2,
+        "cash": 633459.64,
+        "positions": 5,
+        "exposure": 0.4851
+      },
+      {
+        "date": "2025-12-17",
+        "value": 1231801.95,
+        "cash": 740614.27,
+        "positions": 4,
+        "exposure": 0.3988
+      },
+      {
+        "date": "2025-12-18",
+        "value": 1239260.75,
+        "cash": 740614.27,
+        "positions": 4,
+        "exposure": 0.4024
+      },
+      {
+        "date": "2025-12-19",
+        "value": 1241286.15,
+        "cash": 740614.27,
+        "positions": 4,
+        "exposure": 0.4033
+      },
+      {
+        "date": "2025-12-22",
+        "value": 1241077.04,
+        "cash": 624919.62,
+        "positions": 5,
+        "exposure": 0.4965
+      },
+      {
+        "date": "2025-12-23",
+        "value": 1240844.0,
+        "cash": 624919.62,
+        "positions": 5,
+        "exposure": 0.4964
+      },
+      {
+        "date": "2025-12-24",
+        "value": 1276958.68,
+        "cash": 624919.62,
+        "positions": 5,
+        "exposure": 0.5106
+      },
+      {
+        "date": "2025-12-25",
+        "value": 1305088.23,
+        "cash": 624919.62,
+        "positions": 5,
+        "exposure": 0.5212
+      },
+      {
+        "date": "2025-12-26",
+        "value": 1298939.28,
+        "cash": 624919.62,
+        "positions": 5,
+        "exposure": 0.5189
+      },
+      {
+        "date": "2025-12-29",
+        "value": 1296495.77,
+        "cash": 651977.24,
+        "positions": 5,
+        "exposure": 0.4971
+      },
+      {
+        "date": "2025-12-30",
+        "value": 1295411.44,
+        "cash": 651977.24,
+        "positions": 5,
+        "exposure": 0.4967
+      },
+      {
+        "date": "2025-12-31",
+        "value": 1298435.14,
+        "cash": 651977.24,
+        "positions": 5,
+        "exposure": 0.4979
+      },
+      {
+        "date": "2026-01-05",
+        "value": 1307587.72,
+        "cash": 653609.44,
+        "positions": 5,
+        "exposure": 0.5001
+      },
+      {
+        "date": "2026-01-06",
+        "value": 1322934.27,
+        "cash": 653609.44,
+        "positions": 5,
+        "exposure": 0.5059
+      },
+      {
+        "date": "2026-01-07",
+        "value": 1321810.22,
+        "cash": 653609.44,
+        "positions": 5,
+        "exposure": 0.5055
+      },
+      {
+        "date": "2026-01-08",
+        "value": 1324649.02,
+        "cash": 653609.44,
+        "positions": 5,
+        "exposure": 0.5066
+      },
+      {
+        "date": "2026-01-09",
+        "value": 1333054.76,
+        "cash": 653609.44,
+        "positions": 5,
+        "exposure": 0.5097
+      },
+      {
+        "date": "2026-01-12",
+        "value": 1355974.86,
+        "cash": 670725.39,
+        "positions": 5,
+        "exposure": 0.5054
+      },
+      {
+        "date": "2026-01-13",
+        "value": 1341051.94,
+        "cash": 670725.39,
+        "positions": 5,
+        "exposure": 0.4999
+      },
+      {
+        "date": "2026-01-14",
+        "value": 1343401.48,
+        "cash": 805637.42,
+        "positions": 4,
+        "exposure": 0.4003
+      },
+      {
+        "date": "2026-01-15",
+        "value": 1342314.57,
+        "cash": 805637.42,
+        "positions": 4,
+        "exposure": 0.3998
+      },
+      {
+        "date": "2026-01-16",
+        "value": 1342587.34,
+        "cash": 805637.42,
+        "positions": 4,
+        "exposure": 0.3999
+      },
+      {
+        "date": "2026-01-19",
+        "value": 1354940.41,
+        "cash": 685725.35,
+        "positions": 5,
+        "exposure": 0.4939
+      },
+      {
+        "date": "2026-01-20",
+        "value": 1339422.63,
+        "cash": 685725.35,
+        "positions": 5,
+        "exposure": 0.488
+      },
+      {
+        "date": "2026-01-21",
+        "value": 1354102.26,
+        "cash": 685725.35,
+        "positions": 5,
+        "exposure": 0.4936
+      },
+      {
+        "date": "2026-01-22",
+        "value": 1363967.07,
+        "cash": 685725.35,
+        "positions": 5,
+        "exposure": 0.4973
+      },
+      {
+        "date": "2026-01-23",
+        "value": 1362571.68,
+        "cash": 685725.35,
+        "positions": 5,
+        "exposure": 0.4967
+      },
+      {
+        "date": "2026-01-26",
+        "value": 1372446.22,
+        "cash": 687480.92,
+        "positions": 5,
+        "exposure": 0.4991
+      },
+      {
+        "date": "2026-01-27",
+        "value": 1387338.39,
+        "cash": 687480.92,
+        "positions": 5,
+        "exposure": 0.5045
+      },
+      {
+        "date": "2026-01-28",
+        "value": 1393659.15,
+        "cash": 687480.92,
+        "positions": 5,
+        "exposure": 0.5067
+      },
+      {
+        "date": "2026-01-29",
+        "value": 1399195.02,
+        "cash": 687480.92,
+        "positions": 5,
+        "exposure": 0.5087
+      },
+      {
+        "date": "2026-01-30",
+        "value": 1433128.72,
+        "cash": 813932.07,
+        "positions": 4,
+        "exposure": 0.4321
+      },
+      {
+        "date": "2026-02-02",
+        "value": 1426290.41,
+        "cash": 739495.22,
+        "positions": 5,
+        "exposure": 0.4815
+      },
+      {
+        "date": "2026-02-03",
+        "value": 1439287.95,
+        "cash": 739495.22,
+        "positions": 5,
+        "exposure": 0.4862
+      },
+      {
+        "date": "2026-02-04",
+        "value": 1443812.5,
+        "cash": 739495.22,
+        "positions": 5,
+        "exposure": 0.4878
+      },
+      {
+        "date": "2026-02-05",
+        "value": 1438224.64,
+        "cash": 739495.22,
+        "positions": 5,
+        "exposure": 0.4858
+      },
+      {
+        "date": "2026-02-06",
+        "value": 1437063.63,
+        "cash": 739495.22,
+        "positions": 5,
+        "exposure": 0.4854
+      },
+      {
+        "date": "2026-02-09",
+        "value": 1450106.28,
+        "cash": 725364.61,
+        "positions": 5,
+        "exposure": 0.4998
+      },
+      {
+        "date": "2026-02-10",
+        "value": 1472099.09,
+        "cash": 725364.61,
+        "positions": 5,
+        "exposure": 0.5073
+      },
+      {
+        "date": "2026-02-11",
+        "value": 1459972.41,
+        "cash": 878553.87,
+        "positions": 4,
+        "exposure": 0.3982
+      },
+      {
+        "date": "2026-02-12",
+        "value": 1459888.73,
+        "cash": 878553.87,
+        "positions": 4,
+        "exposure": 0.3982
+      },
+      {
+        "date": "2026-02-13",
+        "value": 1471454.28,
+        "cash": 878553.87,
+        "positions": 4,
+        "exposure": 0.4029
+      },
+      {
+        "date": "2026-02-24",
+        "value": 1481837.26,
+        "cash": 739165.84,
+        "positions": 5,
+        "exposure": 0.5012
+      },
+      {
+        "date": "2026-02-25",
+        "value": 1497323.72,
+        "cash": 739165.84,
+        "positions": 5,
+        "exposure": 0.5063
+      },
+      {
+        "date": "2026-02-26",
+        "value": 1511381.48,
+        "cash": 739165.84,
+        "positions": 5,
+        "exposure": 0.5109
+      },
+      {
+        "date": "2026-02-27",
+        "value": 1535871.78,
+        "cash": 739165.84,
+        "positions": 5,
+        "exposure": 0.5187
+      },
+      {
+        "date": "2026-03-02",
+        "value": 1519404.83,
+        "cash": 766792.37,
+        "positions": 5,
+        "exposure": 0.4953
+      },
+      {
+        "date": "2026-03-03",
+        "value": 1501299.19,
+        "cash": 766792.37,
+        "positions": 5,
+        "exposure": 0.4892
+      },
+      {
+        "date": "2026-03-04",
+        "value": 1500668.32,
+        "cash": 766792.37,
+        "positions": 5,
+        "exposure": 0.489
+      },
+      {
+        "date": "2026-03-05",
+        "value": 1502034.9,
+        "cash": 766792.37,
+        "positions": 5,
+        "exposure": 0.4895
+      },
+      {
+        "date": "2026-03-06",
+        "value": 1529356.74,
+        "cash": 766792.37,
+        "positions": 5,
+        "exposure": 0.4986
+      },
+      {
+        "date": "2026-03-09",
+        "value": 1520504.35,
+        "cash": 765916.68,
+        "positions": 5,
+        "exposure": 0.4963
+      },
+      {
+        "date": "2026-03-10",
+        "value": 1526404.71,
+        "cash": 765916.68,
+        "positions": 5,
+        "exposure": 0.4982
+      },
+      {
+        "date": "2026-03-11",
+        "value": 1537213.93,
+        "cash": 765916.68,
+        "positions": 5,
+        "exposure": 0.5018
+      },
+      {
+        "date": "2026-03-12",
+        "value": 1540760.07,
+        "cash": 765916.68,
+        "positions": 5,
+        "exposure": 0.5029
+      },
+      {
+        "date": "2026-03-13",
+        "value": 1519454.78,
+        "cash": 765916.68,
+        "positions": 5,
+        "exposure": 0.4959
+      },
+      {
+        "date": "2026-03-16",
+        "value": 1528421.05,
+        "cash": 783158.21,
+        "positions": 5,
+        "exposure": 0.4876
+      },
+      {
+        "date": "2026-03-17",
+        "value": 1519550.11,
+        "cash": 919321.75,
+        "positions": 4,
+        "exposure": 0.395
+      },
+      {
+        "date": "2026-03-18",
+        "value": 1517552.39,
+        "cash": 919321.75,
+        "positions": 4,
+        "exposure": 0.3942
+      },
+      {
+        "date": "2026-03-19",
+        "value": 1497485.34,
+        "cash": 919321.75,
+        "positions": 4,
+        "exposure": 0.3861
+      },
+      {
+        "date": "2026-03-20",
+        "value": 1486257.44,
+        "cash": 1196130.11,
+        "positions": 2,
+        "exposure": 0.1952
+      },
+      {
+        "date": "2026-03-23",
+        "value": 1437367.29,
+        "cash": 740089.65,
+        "positions": 5,
+        "exposure": 0.4851
+      },
+      {
+        "date": "2026-03-24",
+        "value": 1467059.28,
+        "cash": 740089.65,
+        "positions": 5,
+        "exposure": 0.4955
+      },
+      {
+        "date": "2026-03-25",
+        "value": 1478667.77,
+        "cash": 740089.65,
+        "positions": 5,
+        "exposure": 0.4995
+      },
+      {
+        "date": "2026-03-26",
+        "value": 1468861.81,
+        "cash": 740089.65,
+        "positions": 5,
+        "exposure": 0.4961
+      },
+      {
+        "date": "2026-03-27",
+        "value": 1489077.72,
+        "cash": 740089.65,
+        "positions": 5,
+        "exposure": 0.503
+      },
+      {
+        "date": "2026-03-30",
+        "value": 1484246.41,
+        "cash": 742879.8,
+        "positions": 5,
+        "exposure": 0.4995
+      },
+      {
+        "date": "2026-03-31",
+        "value": 1469428.19,
+        "cash": 742879.8,
+        "positions": 5,
+        "exposure": 0.4944
+      },
+      {
+        "date": "2026-04-01",
+        "value": 1481960.28,
+        "cash": 742879.8,
+        "positions": 5,
+        "exposure": 0.4987
+      },
+      {
+        "date": "2026-04-02",
+        "value": 1475142.42,
+        "cash": 742879.8,
+        "positions": 5,
+        "exposure": 0.4964
+      },
+      {
+        "date": "2026-04-03",
+        "value": 1467774.73,
+        "cash": 742879.8,
+        "positions": 5,
+        "exposure": 0.4939
+      },
+      {
+        "date": "2026-04-07",
+        "value": 1475309.66,
+        "cash": 747571.29,
+        "positions": 5,
+        "exposure": 0.4933
+      },
+      {
+        "date": "2026-04-08",
+        "value": 1521021.28,
+        "cash": 747571.29,
+        "positions": 5,
+        "exposure": 0.5085
+      },
+      {
+        "date": "2026-04-09",
+        "value": 1536781.77,
+        "cash": 747571.29,
+        "positions": 5,
+        "exposure": 0.5135
+      },
+      {
+        "date": "2026-04-10",
+        "value": 1561896.6,
+        "cash": 747571.29,
+        "positions": 5,
+        "exposure": 0.5214
+      },
+      {
+        "date": "2026-04-13",
+        "value": 1554627.73,
+        "cash": 792063.03,
+        "positions": 5,
+        "exposure": 0.4905
+      },
+      {
+        "date": "2026-04-14",
+        "value": 1560725.58,
+        "cash": 792063.03,
+        "positions": 5,
+        "exposure": 0.4925
+      },
+      {
+        "date": "2026-04-15",
+        "value": 1552064.62,
+        "cash": 792063.03,
+        "positions": 5,
+        "exposure": 0.4897
+      },
+      {
+        "date": "2026-04-16",
+        "value": 1573113.87,
+        "cash": 792063.03,
+        "positions": 5,
+        "exposure": 0.4965
+      },
+      {
+        "date": "2026-04-17",
+        "value": 1583539.3,
+        "cash": 792063.03,
+        "positions": 5,
+        "exposure": 0.4998
+      },
+      {
+        "date": "2026-04-20",
+        "value": 1590555.2,
+        "cash": 799929.16,
+        "positions": 5,
+        "exposure": 0.4971
+      },
+      {
+        "date": "2026-04-21",
+        "value": 1623675.79,
+        "cash": 799929.16,
+        "positions": 5,
+        "exposure": 0.5073
+      },
+      {
+        "date": "2026-04-22",
+        "value": 1628270.67,
+        "cash": 799929.16,
+        "positions": 5,
+        "exposure": 0.5087
+      },
+      {
+        "date": "2026-04-23",
+        "value": 1630412.83,
+        "cash": 799929.16,
+        "positions": 5,
+        "exposure": 0.5094
+      },
+      {
+        "date": "2026-04-24",
+        "value": 1623484.3,
+        "cash": 799929.16,
+        "positions": 5,
+        "exposure": 0.5073
+      },
+      {
+        "date": "2026-04-27",
+        "value": 1653043.32,
+        "cash": 819805.86,
+        "positions": 5,
+        "exposure": 0.5041
+      },
+      {
+        "date": "2026-04-28",
+        "value": 1635252.18,
+        "cash": 819805.86,
+        "positions": 5,
+        "exposure": 0.4987
+      },
+      {
+        "date": "2026-04-29",
+        "value": 1664536.1,
+        "cash": 819805.86,
+        "positions": 5,
+        "exposure": 0.5075
+      },
+      {
+        "date": "2026-04-30",
+        "value": 1679146.9,
+        "cash": 819805.86,
+        "positions": 5,
+        "exposure": 0.5118
+      },
+      {
+        "date": "2026-05-06",
+        "value": 1684523.0,
+        "cash": 844683.96,
+        "positions": 5,
+        "exposure": 0.4986
+      },
+      {
+        "date": "2026-05-07",
+        "value": 1713711.98,
+        "cash": 844683.96,
+        "positions": 5,
+        "exposure": 0.5071
+      },
+      {
+        "date": "2026-05-08",
+        "value": 1748398.24,
+        "cash": 844683.96,
+        "positions": 5,
+        "exposure": 0.5169
+      },
+      {
+        "date": "2026-05-11",
+        "value": 1763009.82,
+        "cash": 881906.88,
+        "positions": 5,
+        "exposure": 0.4998
+      },
+      {
+        "date": "2026-05-12",
+        "value": 1743499.2,
+        "cash": 881906.88,
+        "positions": 5,
+        "exposure": 0.4942
+      },
+      {
+        "date": "2026-05-13",
+        "value": 1747141.47,
+        "cash": 881906.88,
+        "positions": 5,
+        "exposure": 0.4952
+      },
+      {
+        "date": "2026-05-14",
+        "value": 1729423.06,
+        "cash": 881906.88,
+        "positions": 5,
+        "exposure": 0.4901
+      },
+      {
+        "date": "2026-05-15",
+        "value": 1727856.84,
+        "cash": 881906.88,
+        "positions": 5,
+        "exposure": 0.4896
+      },
+      {
+        "date": "2026-05-18",
+        "value": 1736912.01,
+        "cash": 878732.53,
+        "positions": 5,
+        "exposure": 0.4941
+      },
+      {
+        "date": "2026-05-19",
+        "value": 1776299.66,
+        "cash": 878732.53,
+        "positions": 5,
+        "exposure": 0.5053
+      },
+      {
+        "date": "2026-05-20",
+        "value": 1771636.37,
+        "cash": 878732.53,
+        "positions": 5,
+        "exposure": 0.504
+      },
+      {
+        "date": "2026-05-21",
+        "value": 1737556.25,
+        "cash": 878732.53,
+        "positions": 5,
+        "exposure": 0.4943
+      },
+      {
+        "date": "2026-05-22",
+        "value": 1755321.77,
+        "cash": 878732.53,
+        "positions": 5,
+        "exposure": 0.4994
+      },
+      {
+        "date": "2026-05-25",
+        "value": 1800525.91,
+        "cash": 897075.94,
+        "positions": 5,
+        "exposure": 0.5018
+      },
+      {
+        "date": "2026-05-26",
+        "value": 1795684.76,
+        "cash": 897075.94,
+        "positions": 5,
+        "exposure": 0.5004
+      },
+      {
+        "date": "2026-05-27",
+        "value": 1780901.16,
+        "cash": 897075.94,
+        "positions": 5,
+        "exposure": 0.4963
+      },
+      {
+        "date": "2026-05-28",
+        "value": 1799467.87,
+        "cash": 897075.94,
+        "positions": 5,
+        "exposure": 0.5015
+      },
+      {
+        "date": "2026-05-29",
+        "value": 1780193.31,
+        "cash": 1252342.29,
+        "positions": 3,
+        "exposure": 0.2965
+      },
+      {
+        "date": "2026-06-01",
+        "value": 1831035.12,
+        "cash": 896117.61,
+        "positions": 5,
+        "exposure": 0.5106
+      },
+      {
+        "date": "2026-06-02",
+        "value": 1827281.61,
+        "cash": 896117.61,
+        "positions": 5,
+        "exposure": 0.5096
+      },
+      {
+        "date": "2026-06-03",
+        "value": 1813566.19,
+        "cash": 1061972.96,
+        "positions": 4,
+        "exposure": 0.4144
+      },
+      {
+        "date": "2026-06-04",
+        "value": 1786259.67,
+        "cash": 1237975.54,
+        "positions": 3,
+        "exposure": 0.3069
+      },
+      {
+        "date": "2026-06-05",
+        "value": 1781865.75,
+        "cash": 1564774.02,
+        "positions": 1,
+        "exposure": 0.1218
+      },
+      {
+        "date": "2026-06-08",
+        "value": 1780402.49,
+        "cash": 892089.38,
+        "positions": 5,
+        "exposure": 0.4989
+      },
+      {
+        "date": "2026-06-09",
+        "value": 1800984.47,
+        "cash": 892089.38,
+        "positions": 5,
+        "exposure": 0.5047
+      },
+      {
+        "date": "2026-06-10",
+        "value": 1786152.29,
+        "cash": 892089.38,
+        "positions": 5,
+        "exposure": 0.5006
+      },
+      {
+        "date": "2026-06-11",
+        "value": 1755746.97,
+        "cash": 1406256.9,
+        "positions": 2,
+        "exposure": 0.1991
+      },
+      {
+        "date": "2026-06-12",
+        "value": 1772827.86,
+        "cash": 1406256.9,
+        "positions": 2,
+        "exposure": 0.2068
+      },
+      {
+        "date": "2026-06-15",
+        "value": 1798850.68,
+        "cash": 903618.93,
+        "positions": 5,
+        "exposure": 0.4977
+      },
+      {
+        "date": "2026-06-16",
+        "value": 1821908.77,
+        "cash": 903618.93,
+        "positions": 5,
+        "exposure": 0.504
+      },
+      {
+        "date": "2026-06-17",
+        "value": 1811450.38,
+        "cash": 903618.93,
+        "positions": 5,
+        "exposure": 0.5012
+      },
+      {
+        "date": "2026-06-18",
+        "value": 1822971.66,
+        "cash": 903618.93,
+        "positions": 5,
+        "exposure": 0.5043
+      },
+      {
+        "date": "2026-06-22",
+        "value": 1851997.51,
+        "cash": 925654.99,
+        "positions": 5,
+        "exposure": 0.5002
+      },
+      {
+        "date": "2026-06-23",
+        "value": 1850230.75,
+        "cash": 925654.99,
+        "positions": 5,
+        "exposure": 0.4997
+      },
+      {
+        "date": "2026-06-24",
+        "value": 1831235.86,
+        "cash": 925654.99,
+        "positions": 5,
+        "exposure": 0.4945
+      },
+      {
+        "date": "2026-06-25",
+        "value": 1811739.47,
+        "cash": 1083345.29,
+        "positions": 4,
+        "exposure": 0.402
+      },
+      {
+        "date": "2026-06-26",
+        "value": 1791541.03,
+        "cash": 1439705.22,
+        "positions": 2,
+        "exposure": 0.1964
+      },
+      {
+        "date": "2026-06-29",
+        "value": 1802408.72,
+        "cash": 899462.72,
+        "positions": 5,
+        "exposure": 0.501
+      },
+      {
+        "date": "2026-06-30",
+        "value": 1858043.71,
+        "cash": 899462.72,
+        "positions": 5,
+        "exposure": 0.5159
+      },
+      {
+        "date": "2026-07-01",
+        "value": 1932618.71,
+        "cash": 899462.72,
+        "positions": 5,
+        "exposure": 0.5346
+      },
+      {
+        "date": "2026-07-02",
+        "value": 1938887.73,
+        "cash": 899462.72,
+        "positions": 5,
+        "exposure": 0.5361
+      },
+      {
+        "date": "2026-07-03",
+        "value": 1927055.72,
+        "cash": 899462.72,
+        "positions": 5,
+        "exposure": 0.5332
+      },
+      {
+        "date": "2026-07-06",
+        "value": 1940345.18,
+        "cash": 969930.86,
+        "positions": 5,
+        "exposure": 0.5001
+      },
+      {
+        "date": "2026-07-07",
+        "value": 1899812.86,
+        "cash": 969930.86,
+        "positions": 5,
+        "exposure": 0.4895
+      },
+      {
+        "date": "2026-07-08",
+        "value": 1910398.14,
+        "cash": 1150382.14,
+        "positions": 4,
+        "exposure": 0.3978
+      },
+      {
+        "date": "2026-07-09",
+        "value": 1902374.45,
+        "cash": 1326358.47,
+        "positions": 3,
+        "exposure": 0.3028
+      },
+      {
+        "date": "2026-07-10",
+        "value": 1917589.45,
+        "cash": 1326358.47,
+        "positions": 3,
+        "exposure": 0.3083
+      },
+      {
+        "date": "2026-07-13",
+        "value": 1888120.84,
+        "cash": 963128.83,
+        "positions": 5,
+        "exposure": 0.4899
+      },
+      {
+        "date": "2026-07-14",
+        "value": 1925526.68,
+        "cash": 1134200.67,
+        "positions": 4,
+        "exposure": 0.411
+      },
+      {
+        "date": "2026-07-15",
+        "value": 1917968.67,
+        "cash": 1134200.67,
+        "positions": 4,
+        "exposure": 0.4086
+      },
+      {
+        "date": "2026-07-16",
+        "value": 1924342.04,
+        "cash": 1322386.05,
+        "positions": 3,
+        "exposure": 0.3128
+      },
+      {
+        "date": "2026-07-17",
+        "value": 1891689.39,
+        "cash": 1513953.38,
+        "positions": 2,
+        "exposure": 0.1997
+      },
+      {
+        "date": "2026-07-20",
+        "value": 1880472.23,
+        "cash": 961198.72,
+        "positions": 5,
+        "exposure": 0.4889
+      },
+      {
+        "date": "2026-07-21",
+        "value": 1855758.85,
+        "cash": 1471609.85,
+        "positions": 2,
+        "exposure": 0.207
+      },
+      {
+        "date": "2026-07-22",
+        "value": 1868902.84,
+        "cash": 1471609.85,
+        "positions": 2,
+        "exposure": 0.2126
+      },
+      {
+        "date": "2026-07-23",
+        "value": 1858862.84,
+        "cash": 1471609.85,
+        "positions": 2,
+        "exposure": 0.2083
+      },
+      {
+        "date": "2026-07-24",
+        "value": 1860644.29,
+        "cash": 1653171.29,
+        "positions": 1,
+        "exposure": 0.1115
+      },
+      {
+        "date": "2026-07-27",
+        "value": 1935784.69,
+        "cash": 938015.71,
+        "positions": 5,
+        "exposure": 0.5154
+      },
+      {
+        "date": "2026-07-28",
+        "value": 1900571.8,
+        "cash": 1134045.8,
+        "positions": 4,
+        "exposure": 0.4033
+      },
+      {
+        "date": "2026-07-29",
+        "value": 1899256.64,
+        "cash": 1296253.62,
+        "positions": 3,
+        "exposure": 0.3175
+      },
+      {
+        "date": "2026-07-30",
+        "value": 1867727.99,
+        "cash": 1495346.98,
+        "positions": 2,
+        "exposure": 0.1994
+      },
+      {
+        "date": "2026-07-31",
+        "value": 1882067.98,
+        "cash": 1495346.98,
+        "positions": 2,
+        "exposure": 0.2055
+      },
+      {
+        "date": "2026-08-03",
+        "value": 1890041.04,
+        "cash": 1129682.26,
+        "positions": 5,
+        "exposure": 0.4023
+      },
+      {
+        "date": "2026-08-04",
+        "value": 1968102.34,
+        "cash": 1129682.26,
+        "positions": 5,
+        "exposure": 0.426
+      },
+      {
+        "date": "2026-08-05",
+        "value": 1999075.61,
+        "cash": 1129682.26,
+        "positions": 5,
+        "exposure": 0.4349
+      },
+      {
+        "date": "2026-08-06",
+        "value": 2044281.37,
+        "cash": 1129682.26,
+        "positions": 5,
+        "exposure": 0.4474
+      },
+      {
+        "date": "2026-08-07",
+        "value": 2074924.35,
+        "cash": 1129682.26,
+        "positions": 5,
+        "exposure": 0.4556
+      },
+      {
+        "date": "2026-08-10",
+        "value": 2097457.05,
+        "cash": 1040847.05,
+        "positions": 5,
+        "exposure": 0.5038
+      },
+      {
+        "date": "2026-08-11",
+        "value": 2085377.06,
+        "cash": 1040847.05,
+        "positions": 5,
+        "exposure": 0.5009
+      },
+      {
+        "date": "2026-08-12",
+        "value": 2098706.06,
+        "cash": 1040847.05,
+        "positions": 5,
+        "exposure": 0.5041
+      },
+      {
+        "date": "2026-08-13",
+        "value": 2115039.06,
+        "cash": 1040847.05,
+        "positions": 5,
+        "exposure": 0.5079
+      },
+      {
+        "date": "2026-08-14",
+        "value": 2097281.05,
+        "cash": 1040847.05,
+        "positions": 5,
+        "exposure": 0.5037
+      },
+      {
+        "date": "2026-08-17",
+        "value": 2107076.42,
+        "cash": 1048942.42,
+        "positions": 5,
+        "exposure": 0.5022
+      },
+      {
+        "date": "2026-08-18",
+        "value": 2105130.42,
+        "cash": 1048942.42,
+        "positions": 5,
+        "exposure": 0.5017
+      },
+      {
+        "date": "2026-08-19",
+        "value": 2139425.44,
+        "cash": 1048942.42,
+        "positions": 5,
+        "exposure": 0.5097
+      },
+      {
+        "date": "2026-08-20",
+        "value": 2155533.43,
+        "cash": 1048942.42,
+        "positions": 5,
+        "exposure": 0.5134
+      },
+      {
+        "date": "2026-08-21",
+        "value": 2133139.18,
+        "cash": 1267409.2,
+        "positions": 4,
+        "exposure": 0.4058
+      },
+      {
+        "date": "2026-08-24",
+        "value": 2148419.49,
+        "cash": 1092026.5,
+        "positions": 5,
+        "exposure": 0.4917
+      },
+      {
+        "date": "2026-08-25",
+        "value": 2187239.49,
+        "cash": 1092026.5,
+        "positions": 5,
+        "exposure": 0.5007
+      },
+      {
+        "date": "2026-08-26",
+        "value": 2221603.5,
+        "cash": 1092026.5,
+        "positions": 5,
+        "exposure": 0.5085
+      },
+      {
+        "date": "2026-08-27",
+        "value": 2203494.52,
+        "cash": 1092026.5,
+        "positions": 5,
+        "exposure": 0.5044
+      },
+      {
+        "date": "2026-08-28",
+        "value": 2202653.78,
+        "cash": 1306330.78,
+        "positions": 4,
+        "exposure": 0.4069
+      },
+      {
+        "date": "2026-08-31",
+        "value": 2241422.96,
+        "cash": 1102615.96,
+        "positions": 5,
+        "exposure": 0.5081
+      },
+      {
+        "date": "2026-09-01",
+        "value": 2227229.96,
+        "cash": 1102615.96,
+        "positions": 5,
+        "exposure": 0.5049
+      },
+      {
+        "date": "2026-09-02",
+        "value": 2212275.97,
+        "cash": 1102615.96,
+        "positions": 5,
+        "exposure": 0.5016
+      },
+      {
+        "date": "2026-09-03",
+        "value": 2223303.94,
+        "cash": 1102615.96,
+        "positions": 5,
+        "exposure": 0.5041
+      },
+      {
+        "date": "2026-09-04",
+        "value": 2194812.95,
+        "cash": 1102615.96,
+        "positions": 5,
+        "exposure": 0.4976
+      },
+      {
+        "date": "2026-09-07",
+        "value": 2262513.42,
+        "cash": 1131073.41,
+        "positions": 5,
+        "exposure": 0.5001
+      },
+      {
+        "date": "2026-09-08",
+        "value": 2278450.4,
+        "cash": 1131073.41,
+        "positions": 5,
+        "exposure": 0.5036
+      },
+      {
+        "date": "2026-09-09",
+        "value": 2270631.99,
+        "cash": 1356340.98,
+        "positions": 4,
+        "exposure": 0.4027
+      },
+      {
+        "date": "2026-09-10",
+        "value": 2244901.96,
+        "cash": 1356340.98,
+        "positions": 4,
+        "exposure": 0.3958
+      },
+      {
+        "date": "2026-09-11",
+        "value": 2224060.39,
+        "cash": 1562391.41,
+        "positions": 3,
+        "exposure": 0.2975
+      },
+      {
+        "date": "2026-09-14",
+        "value": 2241616.28,
+        "cash": 1108289.27,
+        "positions": 5,
+        "exposure": 0.5056
+      },
+      {
+        "date": "2026-09-15",
+        "value": 2234047.28,
+        "cash": 1108289.27,
+        "positions": 5,
+        "exposure": 0.5039
+      },
+      {
+        "date": "2026-09-16",
+        "value": 2241470.27,
+        "cash": 1108289.27,
+        "positions": 5,
+        "exposure": 0.5056
+      },
+      {
+        "date": "2026-09-17",
+        "value": 2233184.27,
+        "cash": 1108289.27,
+        "positions": 5,
+        "exposure": 0.5037
+      },
+      {
+        "date": "2026-09-18",
+        "value": 2259173.27,
+        "cash": 1108289.27,
+        "positions": 5,
+        "exposure": 0.5094
+      },
+      {
+        "date": "2026-09-21",
+        "value": 2269583.22,
+        "cash": 1138250.22,
+        "positions": 5,
+        "exposure": 0.4985
+      },
+      {
+        "date": "2026-09-22",
+        "value": 2268510.21,
+        "cash": 1138250.22,
+        "positions": 5,
+        "exposure": 0.4982
+      },
+      {
+        "date": "2026-09-23",
+        "value": 2246933.22,
+        "cash": 1138250.22,
+        "positions": 5,
+        "exposure": 0.4934
+      },
+      {
+        "date": "2026-09-24",
+        "value": 2242929.2,
+        "cash": 1138250.22,
+        "positions": 5,
+        "exposure": 0.4925
+      },
+      {
+        "date": "2026-09-28",
+        "value": 2213729.07,
+        "cash": 1141008.08,
+        "positions": 5,
+        "exposure": 0.4846
+      },
+      {
+        "date": "2026-09-29",
+        "value": 2220600.06,
+        "cash": 1141008.08,
+        "positions": 5,
+        "exposure": 0.4862
+      },
+      {
+        "date": "2026-09-30",
+        "value": 2224595.82,
+        "cash": 2004347.82,
+        "positions": 1,
+        "exposure": 0.099
+      }
+    ],
+    "trades": [
+      {
+        "symbol": "300190.SZ",
+        "entry_date": "2025-10-09",
+        "exit_date": "2025-10-13",
+        "entry_price": 3.88,
+        "exit_price": 4.18,
+        "shares": 25700,
+        "pnl_pct": 0.073446,
+        "pnl_amount": 7333.28,
+        "duration": 2,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600339.SH",
+        "entry_date": "2025-10-09",
+        "exit_date": "2025-10-13",
+        "entry_price": 3.4,
+        "exit_price": 3.5595,
+        "shares": 29300,
+        "pnl_pct": 0.043157,
+        "pnl_amount": 4304.83,
+        "duration": 2,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002952.SZ",
+        "entry_date": "2025-10-13",
+        "exit_date": "2025-10-16",
+        "entry_price": 17.7871,
+        "exit_price": 20.8115,
+        "shares": 5600,
+        "pnl_pct": 0.165827,
+        "pnl_amount": 16539.12,
+        "duration": 3,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "300159.SZ",
+        "entry_date": "2025-10-09",
+        "exit_date": "2025-10-20",
+        "entry_price": 2.2938,
+        "exit_price": 2.4467,
+        "shares": 43500,
+        "pnl_pct": 0.062832,
+        "pnl_amount": 6277.52,
+        "duration": 7,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300093.SZ",
+        "entry_date": "2025-10-09",
+        "exit_date": "2025-10-20",
+        "entry_price": 11.5717,
+        "exit_price": 12.197,
+        "shares": 8600,
+        "pnl_pct": 0.050244,
+        "pnl_amount": 5006.6,
+        "duration": 7,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603268.SH",
+        "entry_date": "2025-10-09",
+        "exit_date": "2025-10-20",
+        "entry_price": 47.99,
+        "exit_price": 50.29,
+        "shares": 2000,
+        "pnl_pct": 0.044159,
+        "pnl_amount": 4243.89,
+        "duration": 7,
+        "reason": "signal"
+      },
+      {
+        "symbol": "000993.SZ",
+        "entry_date": "2025-10-13",
+        "exit_date": "2025-10-20",
+        "entry_price": 9.7548,
+        "exit_price": 10.0495,
+        "shares": 10200,
+        "pnl_pct": 0.026508,
+        "pnl_amount": 2640.9,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "920642.BJ",
+        "entry_date": "2025-10-20",
+        "exit_date": "2025-10-27",
+        "entry_price": 14.63,
+        "exit_price": 15.9,
+        "shares": 7100,
+        "pnl_pct": 0.0829,
+        "pnl_amount": 8622.31,
+        "duration": 5,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "688208.SH",
+        "entry_date": "2025-10-20",
+        "exit_date": "2025-10-27",
+        "entry_price": 34.2906,
+        "exit_price": 37.1449,
+        "shares": 3000,
+        "pnl_pct": 0.079345,
+        "pnl_amount": 8172.95,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "920682.BJ",
+        "entry_date": "2025-10-20",
+        "exit_date": "2025-10-27",
+        "entry_price": 7.9363,
+        "exit_price": 8.0015,
+        "shares": 13100,
+        "pnl_pct": 0.004589,
+        "pnl_amount": 477.68,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "920689.BJ",
+        "entry_date": "2025-10-20",
+        "exit_date": "2025-10-27",
+        "entry_price": 34.8782,
+        "exit_price": 35.7514,
+        "shares": 2900,
+        "pnl_pct": 0.02135,
+        "pnl_amount": 2162.28,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002643.SZ",
+        "entry_date": "2025-10-20",
+        "exit_date": "2025-10-27",
+        "entry_price": 12.5859,
+        "exit_price": 12.814,
+        "shares": 8300,
+        "pnl_pct": 0.014464,
+        "pnl_amount": 1512.92,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600267.SH",
+        "entry_date": "2025-10-27",
+        "exit_date": "2025-11-03",
+        "entry_price": 10.2632,
+        "exit_price": 10.9879,
+        "shares": 10300,
+        "pnl_pct": 0.066761,
+        "pnl_amount": 7066.58,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300267.SZ",
+        "entry_date": "2025-10-27",
+        "exit_date": "2025-11-03",
+        "entry_price": 3.45,
+        "exit_price": 3.6,
+        "shares": 30800,
+        "pnl_pct": 0.039727,
+        "pnl_amount": 4226.83,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300845.SZ",
+        "entry_date": "2025-10-27",
+        "exit_date": "2025-11-03",
+        "entry_price": 11.2232,
+        "exit_price": 11.4897,
+        "shares": 9400,
+        "pnl_pct": 0.020066,
+        "pnl_amount": 2119.67,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603317.SH",
+        "entry_date": "2025-10-27",
+        "exit_date": "2025-11-03",
+        "entry_price": 10.9765,
+        "exit_price": 11.4982,
+        "shares": 9700,
+        "pnl_pct": 0.043769,
+        "pnl_amount": 4666.21,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300683.SZ",
+        "entry_date": "2025-10-27",
+        "exit_date": "2025-11-03",
+        "entry_price": 33.6,
+        "exit_price": 35.02,
+        "shares": 3100,
+        "pnl_pct": 0.038515,
+        "pnl_amount": 4016.91,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301489.SZ",
+        "entry_date": "2025-11-03",
+        "exit_date": "2025-11-10",
+        "entry_price": 128.4537,
+        "exit_price": 131.3933,
+        "shares": 800,
+        "pnl_pct": 0.019207,
+        "pnl_amount": 1976.38,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300113.SZ",
+        "entry_date": "2025-11-03",
+        "exit_date": "2025-11-14",
+        "entry_price": 21.9436,
+        "exit_price": 19.7492,
+        "shares": 4900,
+        "pnl_pct": -0.103236,
+        "pnl_amount": -11114.7,
+        "duration": 9,
+        "reason": "stop_loss"
+      },
+      {
+        "symbol": "601339.SH",
+        "entry_date": "2025-11-03",
+        "exit_date": "2025-11-17",
+        "entry_price": 5.0342,
+        "exit_price": 5.383,
+        "shares": 21600,
+        "pnl_pct": 0.065444,
+        "pnl_amount": 7125.54,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "000695.SZ",
+        "entry_date": "2025-11-03",
+        "exit_date": "2025-11-17",
+        "entry_price": 11.22,
+        "exit_price": 13.5,
+        "shares": 9600,
+        "pnl_pct": 0.198883,
+        "pnl_amount": 21449.89,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002332.SZ",
+        "entry_date": "2025-11-03",
+        "exit_date": "2025-11-17",
+        "entry_price": 9.1668,
+        "exit_price": 9.6106,
+        "shares": 11800,
+        "pnl_pct": 0.044652,
+        "pnl_amount": 4836.15,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301206.SZ",
+        "entry_date": "2025-11-10",
+        "exit_date": "2025-11-17",
+        "entry_price": 26.7101,
+        "exit_price": 27.7581,
+        "shares": 4000,
+        "pnl_pct": 0.0355,
+        "pnl_amount": 3797.81,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002153.SZ",
+        "entry_date": "2025-11-17",
+        "exit_date": "2025-11-20",
+        "entry_price": 9.5805,
+        "exit_price": 10.5408,
+        "shares": 11600,
+        "pnl_pct": 0.096274,
+        "pnl_amount": 10713.22,
+        "duration": 3,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "603042.SH",
+        "entry_date": "2025-11-17",
+        "exit_date": "2025-11-24",
+        "entry_price": 12.3447,
+        "exit_price": 12.0988,
+        "shares": 9000,
+        "pnl_pct": -0.023449,
+        "pnl_amount": -2608.62,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688365.SH",
+        "entry_date": "2025-11-17",
+        "exit_date": "2025-11-24",
+        "entry_price": 13.25,
+        "exit_price": 17.05,
+        "shares": 8400,
+        "pnl_pct": 0.282166,
+        "pnl_amount": 31445.9,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "601133.SH",
+        "entry_date": "2025-11-17",
+        "exit_date": "2025-11-24",
+        "entry_price": 12.9308,
+        "exit_price": 13.1499,
+        "shares": 8600,
+        "pnl_pct": 0.013293,
+        "pnl_amount": 1480.15,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002203.SZ",
+        "entry_date": "2025-11-17",
+        "exit_date": "2025-11-24",
+        "entry_price": 11.5261,
+        "exit_price": 11.4764,
+        "shares": 9600,
+        "pnl_pct": -0.00789,
+        "pnl_amount": -874.19,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600368.SH",
+        "entry_date": "2025-11-24",
+        "exit_date": "2025-12-01",
+        "entry_price": 3.8112,
+        "exit_price": 3.792,
+        "shares": 30300,
+        "pnl_pct": -0.008615,
+        "pnl_amount": -996.14,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688399.SH",
+        "entry_date": "2025-11-24",
+        "exit_date": "2025-12-01",
+        "entry_price": 41.8878,
+        "exit_price": 47.2926,
+        "shares": 2700,
+        "pnl_pct": 0.124973,
+        "pnl_amount": 14152.44,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "601933.SH",
+        "entry_date": "2025-11-24",
+        "exit_date": "2025-12-01",
+        "entry_price": 4.0,
+        "exit_price": 4.05,
+        "shares": 28900,
+        "pnl_pct": 0.00886,
+        "pnl_amount": 1025.52,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301418.SZ",
+        "entry_date": "2025-11-24",
+        "exit_date": "2025-12-01",
+        "entry_price": 35.4364,
+        "exit_price": 37.2326,
+        "shares": 3200,
+        "pnl_pct": 0.046912,
+        "pnl_amount": 5326.6,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "000890.SZ",
+        "entry_date": "2025-11-24",
+        "exit_date": "2025-12-01",
+        "entry_price": 4.28,
+        "exit_price": 4.5,
+        "shares": 27000,
+        "pnl_pct": 0.047622,
+        "pnl_amount": 5510.32,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002881.SZ",
+        "entry_date": "2025-12-01",
+        "exit_date": "2025-12-08",
+        "entry_price": 42.1024,
+        "exit_price": 46.4912,
+        "shares": 2800,
+        "pnl_pct": 0.100271,
+        "pnl_amount": 11835.93,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300095.SZ",
+        "entry_date": "2025-12-01",
+        "exit_date": "2025-12-08",
+        "entry_price": 9.1864,
+        "exit_price": 10.8836,
+        "shares": 12800,
+        "pnl_pct": 0.180488,
+        "pnl_amount": 21250.48,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002635.SZ",
+        "entry_date": "2025-12-01",
+        "exit_date": "2025-12-08",
+        "entry_price": 13.6058,
+        "exit_price": 13.8733,
+        "shares": 8600,
+        "pnl_pct": 0.015999,
+        "pnl_amount": 1874.46,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600736.SH",
+        "entry_date": "2025-12-01",
+        "exit_date": "2025-12-08",
+        "entry_price": 5.5636,
+        "exit_price": 5.7232,
+        "shares": 21200,
+        "pnl_pct": 0.024975,
+        "pnl_amount": 2949.65,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301026.SZ",
+        "entry_date": "2025-12-01",
+        "exit_date": "2025-12-08",
+        "entry_price": 18.3653,
+        "exit_price": 18.0052,
+        "shares": 6400,
+        "pnl_pct": -0.023133,
+        "pnl_amount": -2722.51,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002916.SZ",
+        "entry_date": "2025-12-08",
+        "exit_date": "2025-12-12",
+        "entry_price": 189.4912,
+        "exit_price": 189.6343,
+        "shares": 600,
+        "pnl_pct": -0.002843,
+        "pnl_amount": -323.63,
+        "duration": 4,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "603608.SH",
+        "entry_date": "2025-12-08",
+        "exit_date": "2025-12-15",
+        "entry_price": 7.16,
+        "exit_price": 7.44,
+        "shares": 16900,
+        "pnl_pct": 0.03537,
+        "pnl_amount": 4285.51,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "003033.SZ",
+        "entry_date": "2025-12-08",
+        "exit_date": "2025-12-15",
+        "entry_price": 58.0416,
+        "exit_price": 67.8606,
+        "shares": 2000,
+        "pnl_pct": 0.164969,
+        "pnl_amount": 19175.06,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "001326.SZ",
+        "entry_date": "2025-12-08",
+        "exit_date": "2025-12-17",
+        "entry_price": 43.7558,
+        "exit_price": 39.7784,
+        "shares": 2700,
+        "pnl_pct": -0.094169,
+        "pnl_amount": -11139.69,
+        "duration": 7,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "301095.SZ",
+        "entry_date": "2025-12-08",
+        "exit_date": "2025-12-22",
+        "entry_price": 66.6745,
+        "exit_price": 66.7244,
+        "shares": 1800,
+        "pnl_pct": -0.00285,
+        "pnl_amount": -342.44,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "920077.BJ",
+        "entry_date": "2025-12-15",
+        "exit_date": "2025-12-22",
+        "entry_price": 13.223,
+        "exit_price": 14.2967,
+        "shares": 9300,
+        "pnl_pct": 0.077316,
+        "pnl_amount": 9520.16,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300933.SZ",
+        "entry_date": "2025-12-15",
+        "exit_date": "2025-12-22",
+        "entry_price": 8.3,
+        "exit_price": 8.02,
+        "shares": 14800,
+        "pnl_pct": -0.037209,
+        "pnl_amount": -4576.69,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "000026.SZ",
+        "entry_date": "2025-12-15",
+        "exit_date": "2025-12-22",
+        "entry_price": 14.7885,
+        "exit_price": 15.5245,
+        "shares": 8300,
+        "pnl_pct": 0.04599,
+        "pnl_amount": 5652.41,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603002.SH",
+        "entry_date": "2025-12-22",
+        "exit_date": "2025-12-29",
+        "entry_price": 7.0621,
+        "exit_price": 7.6215,
+        "shares": 17500,
+        "pnl_pct": 0.075328,
+        "pnl_amount": 9321.62,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "601882.SH",
+        "entry_date": "2025-12-22",
+        "exit_date": "2025-12-29",
+        "entry_price": 18.9024,
+        "exit_price": 19.0994,
+        "shares": 6500,
+        "pnl_pct": 0.006789,
+        "pnl_amount": 835.25,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002197.SZ",
+        "entry_date": "2025-12-22",
+        "exit_date": "2025-12-29",
+        "entry_price": 9.59,
+        "exit_price": 10.53,
+        "shares": 12900,
+        "pnl_pct": 0.094071,
+        "pnl_amount": 11652.75,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301630.SZ",
+        "entry_date": "2025-12-22",
+        "exit_date": "2025-12-29",
+        "entry_price": 120.3536,
+        "exit_price": 124.0118,
+        "shares": 1000,
+        "pnl_pct": 0.026691,
+        "pnl_amount": 3216.58,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300225.SZ",
+        "entry_date": "2025-12-22",
+        "exit_date": "2025-12-29",
+        "entry_price": 4.8,
+        "exit_price": 6.02,
+        "shares": 25800,
+        "pnl_pct": 0.249657,
+        "pnl_amount": 30957.78,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300687.SZ",
+        "entry_date": "2025-12-29",
+        "exit_date": "2026-01-05",
+        "entry_price": 22.02,
+        "exit_price": 23.05,
+        "shares": 5800,
+        "pnl_pct": 0.043012,
+        "pnl_amount": 5500.48,
+        "duration": 3,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300233.SZ",
+        "entry_date": "2025-12-29",
+        "exit_date": "2026-01-05",
+        "entry_price": 14.1323,
+        "exit_price": 13.855,
+        "shares": 9100,
+        "pnl_pct": -0.023146,
+        "pnl_amount": -2980.59,
+        "duration": 3,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600770.SH",
+        "entry_date": "2025-12-29",
+        "exit_date": "2026-01-12",
+        "entry_price": 5.17,
+        "exit_price": 5.52,
+        "shares": 25000,
+        "pnl_pct": 0.06386,
+        "pnl_amount": 8264.57,
+        "duration": 8,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600546.SH",
+        "entry_date": "2025-12-29",
+        "exit_date": "2026-01-12",
+        "entry_price": 9.8313,
+        "exit_price": 10.2976,
+        "shares": 13100,
+        "pnl_pct": 0.043665,
+        "pnl_amount": 5630.94,
+        "duration": 8,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300861.SZ",
+        "entry_date": "2025-12-29",
+        "exit_date": "2026-01-12",
+        "entry_price": 14.6461,
+        "exit_price": 15.5035,
+        "shares": 8800,
+        "pnl_pct": 0.054741,
+        "pnl_amount": 7064.44,
+        "duration": 8,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002165.SZ",
+        "entry_date": "2026-01-05",
+        "exit_date": "2026-01-12",
+        "entry_price": 7.5208,
+        "exit_price": 7.8197,
+        "shares": 17200,
+        "pnl_pct": 0.035997,
+        "pnl_amount": 4662.57,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301606.SZ",
+        "entry_date": "2026-01-05",
+        "exit_date": "2026-01-12",
+        "entry_price": 58.1129,
+        "exit_price": 61.7462,
+        "shares": 2200,
+        "pnl_pct": 0.058701,
+        "pnl_amount": 7514.61,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002940.SZ",
+        "entry_date": "2026-01-12",
+        "exit_date": "2026-01-14",
+        "entry_price": 35.3431,
+        "exit_price": 36.5468,
+        "shares": 3700,
+        "pnl_pct": 0.030338,
+        "pnl_amount": 3972.44,
+        "duration": 2,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "601866.SH",
+        "entry_date": "2026-01-12",
+        "exit_date": "2026-01-19",
+        "entry_price": 2.5297,
+        "exit_price": 2.5198,
+        "shares": 52500,
+        "pnl_pct": -0.007518,
+        "pnl_amount": -999.79,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002443.SZ",
+        "entry_date": "2026-01-12",
+        "exit_date": "2026-01-19",
+        "entry_price": 8.022,
+        "exit_price": 8.7803,
+        "shares": 16500,
+        "pnl_pct": 0.090592,
+        "pnl_amount": 12006.66,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600396.SH",
+        "entry_date": "2026-01-12",
+        "exit_date": "2026-01-19",
+        "entry_price": 2.94,
+        "exit_price": 2.97,
+        "shares": 45200,
+        "pnl_pct": 0.006572,
+        "pnl_amount": 874.48,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603685.SH",
+        "entry_date": "2026-01-12",
+        "exit_date": "2026-01-26",
+        "entry_price": 19.0293,
+        "exit_price": 19.7884,
+        "shares": 6900,
+        "pnl_pct": 0.036156,
+        "pnl_amount": 4753.57,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300570.SZ",
+        "entry_date": "2026-01-19",
+        "exit_date": "2026-01-26",
+        "entry_price": 110.9736,
+        "exit_price": 101.4787,
+        "shares": 1200,
+        "pnl_pct": -0.088848,
+        "pnl_amount": -11847.16,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "605020.SH",
+        "entry_date": "2026-01-19",
+        "exit_date": "2026-01-26",
+        "entry_price": 26.3181,
+        "exit_price": 28.1196,
+        "shares": 5000,
+        "pnl_pct": 0.064611,
+        "pnl_amount": 8513.24,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "000811.SZ",
+        "entry_date": "2026-01-19",
+        "exit_date": "2026-01-26",
+        "entry_price": 15.9672,
+        "exit_price": 16.8454,
+        "shares": 8400,
+        "pnl_pct": 0.051207,
+        "pnl_amount": 6877.03,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300727.SZ",
+        "entry_date": "2026-01-19",
+        "exit_date": "2026-01-26",
+        "entry_price": 36.3335,
+        "exit_price": 37.9796,
+        "shares": 3600,
+        "pnl_pct": 0.041548,
+        "pnl_amount": 5441.5,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603271.SH",
+        "entry_date": "2026-01-26",
+        "exit_date": "2026-01-30",
+        "entry_price": 46.7171,
+        "exit_price": 43.7044,
+        "shares": 2900,
+        "pnl_pct": -0.067852,
+        "pnl_amount": -9204.55,
+        "duration": 4,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "300394.SZ",
+        "entry_date": "2026-01-26",
+        "exit_date": "2026-02-02",
+        "entry_price": 134.2356,
+        "exit_price": 177.7803,
+        "shares": 1000,
+        "pnl_pct": 0.319629,
+        "pnl_amount": 42961.32,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300548.SZ",
+        "entry_date": "2026-01-26",
+        "exit_date": "2026-02-02",
+        "entry_price": 131.845,
+        "exit_price": 157.8685,
+        "shares": 1000,
+        "pnl_pct": 0.193074,
+        "pnl_amount": 25488.99,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300502.SZ",
+        "entry_date": "2026-01-26",
+        "exit_date": "2026-02-02",
+        "entry_price": 270.9338,
+        "exit_price": 326.1764,
+        "shares": 500,
+        "pnl_pct": 0.199568,
+        "pnl_amount": 27070.05,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "605268.SH",
+        "entry_date": "2026-01-26",
+        "exit_date": "2026-02-09",
+        "entry_price": 10.9617,
+        "exit_price": 11.0979,
+        "shares": 12400,
+        "pnl_pct": 0.008782,
+        "pnl_amount": 1195.3,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300709.SZ",
+        "entry_date": "2026-02-02",
+        "exit_date": "2026-02-09",
+        "entry_price": 41.079,
+        "exit_price": 38.9306,
+        "shares": 3500,
+        "pnl_pct": -0.055706,
+        "pnl_amount": -8019.62,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301603.SZ",
+        "entry_date": "2026-02-02",
+        "exit_date": "2026-02-09",
+        "entry_price": 70.5939,
+        "exit_price": 68.487,
+        "shares": 2000,
+        "pnl_pct": -0.033332,
+        "pnl_amount": -4712.24,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002205.SZ",
+        "entry_date": "2026-02-02",
+        "exit_date": "2026-02-09",
+        "entry_price": 14.0,
+        "exit_price": 14.65,
+        "shares": 10200,
+        "pnl_pct": 0.042666,
+        "pnl_amount": 6100.67,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600208.SH",
+        "entry_date": "2026-02-02",
+        "exit_date": "2026-02-09",
+        "entry_price": 3.68,
+        "exit_price": 3.68,
+        "shares": 39000,
+        "pnl_pct": -0.003595,
+        "pnl_amount": -516.67,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300027.SZ",
+        "entry_date": "2026-02-09",
+        "exit_date": "2026-02-11",
+        "entry_price": 1.98,
+        "exit_price": 2.112,
+        "shares": 72700,
+        "pnl_pct": 0.062832,
+        "pnl_amount": 9056.13,
+        "duration": 2,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "301555.SZ",
+        "entry_date": "2026-02-09",
+        "exit_date": "2026-02-24",
+        "entry_price": 34.8,
+        "exit_price": 38.22,
+        "shares": 4100,
+        "pnl_pct": 0.094327,
+        "pnl_amount": 13476.11,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "000623.SZ",
+        "entry_date": "2026-02-09",
+        "exit_date": "2026-02-24",
+        "entry_price": 18.6942,
+        "exit_price": 18.2124,
+        "shares": 7700,
+        "pnl_pct": -0.029279,
+        "pnl_amount": -4220.0,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688758.SH",
+        "entry_date": "2026-02-09",
+        "exit_date": "2026-02-24",
+        "entry_price": 18.9478,
+        "exit_price": 20.2442,
+        "shares": 7500,
+        "pnl_pct": 0.06458,
+        "pnl_amount": 9189.26,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603213.SH",
+        "entry_date": "2026-02-09",
+        "exit_date": "2026-02-24",
+        "entry_price": 13.462,
+        "exit_price": 13.6976,
+        "shares": 10600,
+        "pnl_pct": 0.013847,
+        "pnl_amount": 1978.53,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603177.SH",
+        "entry_date": "2026-02-24",
+        "exit_date": "2026-03-02",
+        "entry_price": 11.86,
+        "exit_price": 12.13,
+        "shares": 12300,
+        "pnl_pct": 0.019088,
+        "pnl_amount": 2788.21,
+        "duration": 4,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603871.SH",
+        "entry_date": "2026-02-24",
+        "exit_date": "2026-03-02",
+        "entry_price": 14.0251,
+        "exit_price": 15.1538,
+        "shares": 10400,
+        "pnl_pct": 0.076591,
+        "pnl_amount": 11186.22,
+        "duration": 4,
+        "reason": "signal"
+      },
+      {
+        "symbol": "601083.SH",
+        "entry_date": "2026-02-24",
+        "exit_date": "2026-03-02",
+        "entry_price": 11.0539,
+        "exit_price": 12.2937,
+        "shares": 13200,
+        "pnl_pct": 0.108159,
+        "pnl_amount": 15802.18,
+        "duration": 4,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600243.SH",
+        "entry_date": "2026-02-24",
+        "exit_date": "2026-03-09",
+        "entry_price": 3.33,
+        "exit_price": 3.62,
+        "shares": 44100,
+        "pnl_pct": 0.083179,
+        "pnl_amount": 12230.91,
+        "duration": 9,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600969.SH",
+        "entry_date": "2026-02-24",
+        "exit_date": "2026-03-09",
+        "entry_price": 9.3332,
+        "exit_price": 10.3889,
+        "shares": 15700,
+        "pnl_pct": 0.109106,
+        "pnl_amount": 16008.22,
+        "duration": 9,
+        "reason": "signal"
+      },
+      {
+        "symbol": "001226.SZ",
+        "entry_date": "2026-03-02",
+        "exit_date": "2026-03-09",
+        "entry_price": 45.6,
+        "exit_price": 45.93,
+        "shares": 3200,
+        "pnl_pct": 0.003616,
+        "pnl_amount": 528.27,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002972.SZ",
+        "entry_date": "2026-03-02",
+        "exit_date": "2026-03-09",
+        "entry_price": 12.4124,
+        "exit_price": 12.069,
+        "shares": 11800,
+        "pnl_pct": -0.031164,
+        "pnl_amount": -4570.38,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301287.SZ",
+        "entry_date": "2026-03-02",
+        "exit_date": "2026-03-09",
+        "entry_price": 44.6703,
+        "exit_price": 43.2409,
+        "shares": 3300,
+        "pnl_pct": -0.03548,
+        "pnl_amount": -5237.02,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300531.SZ",
+        "entry_date": "2026-03-09",
+        "exit_date": "2026-03-16",
+        "entry_price": 16.1193,
+        "exit_price": 18.6566,
+        "shares": 9400,
+        "pnl_pct": 0.153246,
+        "pnl_amount": 23250.27,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603666.SH",
+        "entry_date": "2026-03-09",
+        "exit_date": "2026-03-16",
+        "entry_price": 28.7,
+        "exit_price": 28.2,
+        "shares": 5200,
+        "pnl_pct": -0.020954,
+        "pnl_amount": -3131.28,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688719.SH",
+        "entry_date": "2026-03-09",
+        "exit_date": "2026-03-17",
+        "entry_price": 41.8,
+        "exit_price": 37.9104,
+        "shares": 3600,
+        "pnl_pct": -0.096313,
+        "pnl_amount": -14512.07,
+        "duration": 6,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "300339.SZ",
+        "entry_date": "2026-03-09",
+        "exit_date": "2026-03-20",
+        "entry_price": 45.5065,
+        "exit_price": 42.5672,
+        "shares": 3300,
+        "pnl_pct": -0.067953,
+        "pnl_amount": -10217.83,
+        "duration": 9,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "920247.BJ",
+        "entry_date": "2026-03-16",
+        "exit_date": "2026-03-20",
+        "entry_price": 18.7603,
+        "exit_price": 16.9105,
+        "shares": 8100,
+        "pnl_pct": -0.101844,
+        "pnl_amount": -15496.13,
+        "duration": 4,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "002217.SZ",
+        "entry_date": "2026-03-09",
+        "exit_date": "2026-03-23",
+        "entry_price": 2.65,
+        "exit_price": 2.385,
+        "shares": 57200,
+        "pnl_pct": -0.103236,
+        "pnl_amount": -15668.83,
+        "duration": 10,
+        "reason": "stop_loss"
+      },
+      {
+        "symbol": "002107.SZ",
+        "entry_date": "2026-03-16",
+        "exit_date": "2026-03-23",
+        "entry_price": 6.5378,
+        "exit_price": 5.9088,
+        "shares": 23200,
+        "pnl_pct": -0.099466,
+        "pnl_amount": -15106.25,
+        "duration": 5,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "920249.BJ",
+        "entry_date": "2026-03-23",
+        "exit_date": "2026-03-30",
+        "entry_price": 8.89,
+        "exit_price": 8.001,
+        "shares": 16500,
+        "pnl_pct": -0.103236,
+        "pnl_amount": -15162.83,
+        "duration": 5,
+        "reason": "stop_loss"
+      },
+      {
+        "symbol": "000408.SZ",
+        "entry_date": "2026-03-23",
+        "exit_date": "2026-03-30",
+        "entry_price": 69.075,
+        "exit_price": 78.0974,
+        "shares": 2100,
+        "pnl_pct": 0.126553,
+        "pnl_amount": 18381.33,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301372.SZ",
+        "entry_date": "2026-03-23",
+        "exit_date": "2026-03-30",
+        "entry_price": 25.83,
+        "exit_price": 26.19,
+        "shares": 5600,
+        "pnl_pct": 0.010292,
+        "pnl_amount": 1490.63,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "601886.SH",
+        "entry_date": "2026-03-23",
+        "exit_date": "2026-03-30",
+        "entry_price": 7.91,
+        "exit_price": 7.9478,
+        "shares": 18500,
+        "pnl_pct": 0.001172,
+        "pnl_amount": 171.75,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688136.SH",
+        "entry_date": "2026-03-23",
+        "exit_date": "2026-03-30",
+        "entry_price": 25.4817,
+        "exit_price": 26.735,
+        "shares": 5700,
+        "pnl_pct": 0.045414,
+        "pnl_amount": 6604.83,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603200.SH",
+        "entry_date": "2026-03-30",
+        "exit_date": "2026-04-07",
+        "entry_price": 58.6305,
+        "exit_price": 56.8617,
+        "shares": 2500,
+        "pnl_pct": -0.033656,
+        "pnl_amount": -4939.53,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300200.SZ",
+        "entry_date": "2026-03-30",
+        "exit_date": "2026-04-07",
+        "entry_price": 9.4595,
+        "exit_price": 8.928,
+        "shares": 15600,
+        "pnl_pct": -0.059585,
+        "pnl_amount": -8804.27,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002907.SZ",
+        "entry_date": "2026-03-30",
+        "exit_date": "2026-04-07",
+        "entry_price": 13.5478,
+        "exit_price": 14.1944,
+        "shares": 10900,
+        "pnl_pct": 0.043957,
+        "pnl_amount": 6499.63,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600094.SH",
+        "entry_date": "2026-03-30",
+        "exit_date": "2026-04-07",
+        "entry_price": 4.04,
+        "exit_price": 4.19,
+        "shares": 36500,
+        "pnl_pct": 0.0334,
+        "pnl_amount": 4931.55,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300131.SZ",
+        "entry_date": "2026-03-30",
+        "exit_date": "2026-04-13",
+        "entry_price": 12.18,
+        "exit_price": 15.46,
+        "shares": 12100,
+        "pnl_pct": 0.26473,
+        "pnl_amount": 39066.15,
+        "duration": 9,
+        "reason": "signal"
+      },
+      {
+        "symbol": "000573.SZ",
+        "entry_date": "2026-04-07",
+        "exit_date": "2026-04-13",
+        "entry_price": 3.8529,
+        "exit_price": 4.4852,
+        "shares": 38000,
+        "pnl_pct": 0.159917,
+        "pnl_amount": 23443.94,
+        "duration": 4,
+        "reason": "signal"
+      },
+      {
+        "symbol": "000426.SZ",
+        "entry_date": "2026-04-07",
+        "exit_date": "2026-04-13",
+        "entry_price": 39.3122,
+        "exit_price": 42.8126,
+        "shares": 3700,
+        "pnl_pct": 0.085126,
+        "pnl_amount": 12398.07,
+        "duration": 4,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002190.SZ",
+        "entry_date": "2026-04-07",
+        "exit_date": "2026-04-13",
+        "entry_price": 30.13,
+        "exit_price": 31.04,
+        "shares": 4800,
+        "pnl_pct": 0.026499,
+        "pnl_amount": 3837.32,
+        "duration": 4,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002357.SZ",
+        "entry_date": "2026-04-07",
+        "exit_date": "2026-04-20",
+        "entry_price": 11.39,
+        "exit_price": 10.95,
+        "shares": 12800,
+        "pnl_pct": -0.042087,
+        "pnl_amount": -6143.9,
+        "duration": 9,
+        "reason": "signal"
+      },
+      {
+        "symbol": "920533.BJ",
+        "entry_date": "2026-04-13",
+        "exit_date": "2026-04-20",
+        "entry_price": 22.8768,
+        "exit_price": 24.8877,
+        "shares": 6700,
+        "pnl_pct": 0.083991,
+        "pnl_amount": 12890.42,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301528.SZ",
+        "entry_date": "2026-04-13",
+        "exit_date": "2026-04-20",
+        "entry_price": 42.0153,
+        "exit_price": 49.5862,
+        "shares": 3700,
+        "pnl_pct": 0.17595,
+        "pnl_amount": 27388.21,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600807.SH",
+        "entry_date": "2026-04-13",
+        "exit_date": "2026-04-20",
+        "entry_price": 3.05,
+        "exit_price": 2.94,
+        "shares": 50900,
+        "pnl_pct": -0.039531,
+        "pnl_amount": -6145.0,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301336.SZ",
+        "entry_date": "2026-04-13",
+        "exit_date": "2026-04-27",
+        "entry_price": 39.513,
+        "exit_price": 40.0412,
+        "shares": 3900,
+        "pnl_pct": 0.009726,
+        "pnl_amount": 1500.74,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "601777.SH",
+        "entry_date": "2026-04-20",
+        "exit_date": "2026-04-27",
+        "entry_price": 10.02,
+        "exit_price": 10.8,
+        "shares": 15700,
+        "pnl_pct": 0.073969,
+        "pnl_amount": 11651.5,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300533.SZ",
+        "entry_date": "2026-04-20",
+        "exit_date": "2026-04-27",
+        "entry_price": 17.3376,
+        "exit_price": 20.0392,
+        "shares": 9100,
+        "pnl_pct": 0.151673,
+        "pnl_amount": 23960.84,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301093.SZ",
+        "entry_date": "2026-04-20",
+        "exit_date": "2026-04-27",
+        "entry_price": 60.4159,
+        "exit_price": 61.1848,
+        "shares": 2600,
+        "pnl_pct": 0.009085,
+        "pnl_amount": 1428.91,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600054.SH",
+        "entry_date": "2026-04-20",
+        "exit_date": "2026-05-06",
+        "entry_price": 12.1306,
+        "exit_price": 11.7432,
+        "shares": 13000,
+        "pnl_pct": -0.035422,
+        "pnl_amount": -5593.18,
+        "duration": 9,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301193.SZ",
+        "entry_date": "2026-04-27",
+        "exit_date": "2026-05-06",
+        "entry_price": 21.53,
+        "exit_price": 26.75,
+        "shares": 7500,
+        "pnl_pct": 0.237985,
+        "pnl_amount": 38478.64,
+        "duration": 4,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688077.SH",
+        "entry_date": "2026-04-27",
+        "exit_date": "2026-05-06",
+        "entry_price": 28.7341,
+        "exit_price": 30.0046,
+        "shares": 5600,
+        "pnl_pct": 0.04046,
+        "pnl_amount": 6518.9,
+        "duration": 4,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300777.SZ",
+        "entry_date": "2026-04-27",
+        "exit_date": "2026-05-11",
+        "entry_price": 35.7918,
+        "exit_price": 40.3253,
+        "shares": 4500,
+        "pnl_pct": 0.122612,
+        "pnl_amount": 19773.97,
+        "duration": 7,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002474.SZ",
+        "entry_date": "2026-04-27",
+        "exit_date": "2026-05-11",
+        "entry_price": 7.02,
+        "exit_price": 8.46,
+        "shares": 23000,
+        "pnl_pct": 0.200795,
+        "pnl_amount": 32462.57,
+        "duration": 7,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002915.SZ",
+        "entry_date": "2026-05-06",
+        "exit_date": "2026-05-11",
+        "entry_price": 18.52,
+        "exit_price": 21.0,
+        "shares": 8900,
+        "pnl_pct": 0.129832,
+        "pnl_amount": 21427.85,
+        "duration": 3,
+        "reason": "signal"
+      },
+      {
+        "symbol": "301038.SZ",
+        "entry_date": "2026-05-06",
+        "exit_date": "2026-05-18",
+        "entry_price": 19.6043,
+        "exit_price": 20.4999,
+        "shares": 8400,
+        "pnl_pct": 0.041926,
+        "pnl_amount": 6913.12,
+        "duration": 8,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603616.SH",
+        "entry_date": "2026-05-11",
+        "exit_date": "2026-05-18",
+        "entry_price": 6.7,
+        "exit_price": 6.64,
+        "shares": 26200,
+        "pnl_pct": -0.012518,
+        "pnl_amount": -2200.33,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600596.SH",
+        "entry_date": "2026-05-11",
+        "exit_date": "2026-05-18",
+        "entry_price": 11.9594,
+        "exit_price": 11.8302,
+        "shares": 14600,
+        "pnl_pct": -0.014354,
+        "pnl_amount": -2509.54,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300353.SZ",
+        "entry_date": "2026-05-06",
+        "exit_date": "2026-05-25",
+        "entry_price": 18.76,
+        "exit_price": 20.53,
+        "shares": 8800,
+        "pnl_pct": 0.090415,
+        "pnl_amount": 14945.86,
+        "duration": 13,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300634.SZ",
+        "entry_date": "2026-05-11",
+        "exit_date": "2026-05-25",
+        "entry_price": 24.7998,
+        "exit_price": 27.6315,
+        "shares": 7000,
+        "pnl_pct": 0.110177,
+        "pnl_amount": 19151.39,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600732.SH",
+        "entry_date": "2026-05-18",
+        "exit_date": "2026-05-25",
+        "entry_price": 13.3,
+        "exit_price": 12.72,
+        "shares": 13000,
+        "pnl_pct": -0.047048,
+        "pnl_amount": -8145.1,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "601608.SH",
+        "entry_date": "2026-05-18",
+        "exit_date": "2026-05-25",
+        "entry_price": 5.8211,
+        "exit_price": 6.1688,
+        "shares": 29800,
+        "pnl_pct": 0.055917,
+        "pnl_amount": 9712.46,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300735.SZ",
+        "entry_date": "2026-05-25",
+        "exit_date": "2026-05-29",
+        "entry_price": 20.56,
+        "exit_price": 22.3484,
+        "shares": 8500,
+        "pnl_pct": 0.083076,
+        "pnl_amount": 14537.26,
+        "duration": 4,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "688385.SH",
+        "entry_date": "2026-05-25",
+        "exit_date": "2026-05-29",
+        "entry_price": 67.2412,
+        "exit_price": 63.8938,
+        "shares": 2600,
+        "pnl_pct": -0.053199,
+        "pnl_amount": -9312.8,
+        "duration": 4,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "600568.SH",
+        "entry_date": "2026-05-18",
+        "exit_date": "2026-06-01",
+        "entry_price": 2.56,
+        "exit_price": 2.51,
+        "shares": 67900,
+        "pnl_pct": -0.023056,
+        "pnl_amount": -4012.95,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "605277.SH",
+        "entry_date": "2026-05-25",
+        "exit_date": "2026-06-01",
+        "entry_price": 18.9855,
+        "exit_price": 21.1316,
+        "shares": 9300,
+        "pnl_pct": 0.109042,
+        "pnl_amount": 19277.94,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600676.SH",
+        "entry_date": "2026-05-25",
+        "exit_date": "2026-06-01",
+        "entry_price": 7.02,
+        "exit_price": 6.75,
+        "shares": 25100,
+        "pnl_pct": -0.041919,
+        "pnl_amount": -7395.74,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603336.SH",
+        "entry_date": "2026-06-01",
+        "exit_date": "2026-06-03",
+        "entry_price": 9.8276,
+        "exit_price": 9.1844,
+        "shares": 18100,
+        "pnl_pct": -0.068807,
+        "pnl_amount": -12255.3,
+        "duration": 2,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "600678.SH",
+        "entry_date": "2026-06-01",
+        "exit_date": "2026-06-04",
+        "entry_price": 6.56,
+        "exit_price": 6.4856,
+        "shares": 27200,
+        "pnl_pct": -0.014896,
+        "pnl_amount": -2661.38,
+        "duration": 3,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "000953.SZ",
+        "entry_date": "2026-06-01",
+        "exit_date": "2026-06-05",
+        "entry_price": 6.47,
+        "exit_price": 5.9048,
+        "shares": 27500,
+        "pnl_pct": -0.090638,
+        "pnl_amount": -16147.77,
+        "duration": 4,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "300778.SZ",
+        "entry_date": "2026-06-01",
+        "exit_date": "2026-06-05",
+        "entry_price": 11.76,
+        "exit_price": 10.9384,
+        "shares": 15100,
+        "pnl_pct": -0.073208,
+        "pnl_amount": -13016.9,
+        "duration": 4,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "301236.SZ",
+        "entry_date": "2026-06-01",
+        "exit_date": "2026-06-08",
+        "entry_price": 34.3076,
+        "exit_price": 40.5299,
+        "shares": 5200,
+        "pnl_pct": 0.177121,
+        "pnl_amount": 31639.37,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "605398.SH",
+        "entry_date": "2026-06-08",
+        "exit_date": "2026-06-11",
+        "entry_price": 23.946,
+        "exit_price": 23.076,
+        "shares": 7400,
+        "pnl_pct": -0.039795,
+        "pnl_amount": -7060.85,
+        "duration": 3,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "920252.BJ",
+        "entry_date": "2026-06-08",
+        "exit_date": "2026-06-11",
+        "entry_price": 19.85,
+        "exit_price": 20.944,
+        "shares": 8900,
+        "pnl_pct": 0.05132,
+        "pnl_amount": 9078.2,
+        "duration": 3,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "300906.SZ",
+        "entry_date": "2026-06-08",
+        "exit_date": "2026-06-11",
+        "entry_price": 29.18,
+        "exit_price": 26.3648,
+        "shares": 6000,
+        "pnl_pct": -0.099726,
+        "pnl_amount": -17482.64,
+        "duration": 3,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "600109.SH",
+        "entry_date": "2026-06-08",
+        "exit_date": "2026-06-15",
+        "entry_price": 7.7781,
+        "exit_price": 8.5015,
+        "shares": 22700,
+        "pnl_pct": 0.089064,
+        "pnl_amount": 15745.94,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300898.SZ",
+        "entry_date": "2026-06-08",
+        "exit_date": "2026-06-15",
+        "entry_price": 20.5,
+        "exit_price": 20.44,
+        "shares": 8600,
+        "pnl_pct": -0.006512,
+        "pnl_amount": -1149.49,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688309.SH",
+        "entry_date": "2026-06-15",
+        "exit_date": "2026-06-22",
+        "entry_price": 58.7882,
+        "exit_price": 64.95,
+        "shares": 3000,
+        "pnl_pct": 0.100842,
+        "pnl_amount": 17808.01,
+        "duration": 4,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688195.SH",
+        "entry_date": "2026-06-15",
+        "exit_date": "2026-06-22",
+        "entry_price": 190.56,
+        "exit_price": 215.0,
+        "shares": 900,
+        "pnl_pct": 0.124197,
+        "pnl_amount": 21328.0,
+        "duration": 4,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300740.SZ",
+        "entry_date": "2026-06-15",
+        "exit_date": "2026-06-22",
+        "entry_price": 21.1844,
+        "exit_price": 22.4288,
+        "shares": 8300,
+        "pnl_pct": 0.054934,
+        "pnl_amount": 9671.66,
+        "duration": 4,
+        "reason": "signal"
+      },
+      {
+        "symbol": "605028.SH",
+        "entry_date": "2026-06-15",
+        "exit_date": "2026-06-25",
+        "entry_price": 22.2298,
+        "exit_price": 20.0068,
+        "shares": 7900,
+        "pnl_pct": -0.103236,
+        "pnl_amount": -18153.36,
+        "duration": 7,
+        "reason": "stop_loss"
+      },
+      {
+        "symbol": "688318.SH",
+        "entry_date": "2026-06-15",
+        "exit_date": "2026-06-26",
+        "entry_price": 70.88,
+        "exit_price": 76.4368,
+        "shares": 2400,
+        "pnl_pct": 0.07452,
+        "pnl_amount": 12693.25,
+        "duration": 8,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "920068.BJ",
+        "entry_date": "2026-06-22",
+        "exit_date": "2026-06-26",
+        "entry_price": 17.01,
+        "exit_price": 16.0864,
+        "shares": 10800,
+        "pnl_pct": -0.057698,
+        "pnl_amount": -10613.28,
+        "duration": 4,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "002548.SZ",
+        "entry_date": "2026-06-22",
+        "exit_date": "2026-06-29",
+        "entry_price": 3.8,
+        "exit_price": 3.47,
+        "shares": 48300,
+        "pnl_pct": -0.090125,
+        "pnl_amount": -16563.08,
+        "duration": 5,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "300192.SZ",
+        "entry_date": "2026-06-22",
+        "exit_date": "2026-06-29",
+        "entry_price": 11.8186,
+        "exit_price": 11.74,
+        "shares": 15500,
+        "pnl_pct": -0.010218,
+        "pnl_amount": -1874.25,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300287.SZ",
+        "entry_date": "2026-06-29",
+        "exit_date": "2026-07-06",
+        "entry_price": 3.14,
+        "exit_price": 3.4848,
+        "shares": 56800,
+        "pnl_pct": 0.105819,
+        "pnl_amount": 18897.52,
+        "duration": 5,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "688626.SH",
+        "entry_date": "2026-06-29",
+        "exit_date": "2026-07-06",
+        "entry_price": 43.0,
+        "exit_price": 51.33,
+        "shares": 4100,
+        "pnl_pct": 0.189429,
+        "pnl_amount": 33439.78,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603657.SH",
+        "entry_date": "2026-06-29",
+        "exit_date": "2026-07-06",
+        "entry_price": 22.61,
+        "exit_price": 26.51,
+        "shares": 7800,
+        "pnl_pct": 0.168275,
+        "pnl_amount": 29715.14,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300044.SZ",
+        "entry_date": "2026-06-29",
+        "exit_date": "2026-07-06",
+        "entry_price": 4.47,
+        "exit_price": 5.65,
+        "shares": 39900,
+        "pnl_pct": 0.259438,
+        "pnl_amount": 46331.65,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "603130.SH",
+        "entry_date": "2026-07-06",
+        "exit_date": "2026-07-08",
+        "entry_price": 40.57,
+        "exit_price": 38.4824,
+        "shares": 4700,
+        "pnl_pct": -0.054867,
+        "pnl_amount": -10475.6,
+        "duration": 2,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "600513.SH",
+        "entry_date": "2026-07-06",
+        "exit_date": "2026-07-09",
+        "entry_price": 15.6262,
+        "exit_price": 14.34,
+        "shares": 12300,
+        "pnl_pct": -0.085612,
+        "pnl_amount": -16476.31,
+        "duration": 3,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "600308.SH",
+        "entry_date": "2026-06-29",
+        "exit_date": "2026-07-13",
+        "entry_price": 3.01,
+        "exit_price": 3.2,
+        "shares": 59300,
+        "pnl_pct": 0.059301,
+        "pnl_amount": 10598.51,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688561.SH",
+        "entry_date": "2026-07-06",
+        "exit_date": "2026-07-13",
+        "entry_price": 23.41,
+        "exit_price": 25.5,
+        "shares": 8200,
+        "pnl_pct": 0.085362,
+        "pnl_amount": 16407.52,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300063.SZ",
+        "entry_date": "2026-07-13",
+        "exit_date": "2026-07-14",
+        "entry_price": 8.43,
+        "exit_price": 7.587,
+        "shares": 22600,
+        "pnl_pct": -0.103236,
+        "pnl_amount": -19693.85,
+        "duration": 1,
+        "reason": "stop_loss"
+      },
+      {
+        "symbol": "300191.SZ",
+        "entry_date": "2026-07-13",
+        "exit_date": "2026-07-16",
+        "entry_price": 26.99,
+        "exit_price": 26.9456,
+        "shares": 7000,
+        "pnl_pct": -0.005234,
+        "pnl_amount": -990.23,
+        "duration": 3,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "603159.SH",
+        "entry_date": "2026-07-13",
+        "exit_date": "2026-07-17",
+        "entry_price": 18.29,
+        "exit_price": 18.4624,
+        "shares": 10400,
+        "pnl_pct": 0.005797,
+        "pnl_amount": 1104.04,
+        "duration": 4,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "300261.SZ",
+        "entry_date": "2026-07-06",
+        "exit_date": "2026-07-20",
+        "entry_price": 4.58,
+        "exit_price": 4.6,
+        "shares": 42000,
+        "pnl_pct": 0.000756,
+        "pnl_amount": 145.57,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002146.SZ",
+        "entry_date": "2026-07-13",
+        "exit_date": "2026-07-20",
+        "entry_price": 1.1,
+        "exit_price": 1.08,
+        "shares": 173200,
+        "pnl_pct": -0.021712,
+        "pnl_amount": -4141.9,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002353.SZ",
+        "entry_date": "2026-07-20",
+        "exit_date": "2026-07-21",
+        "entry_price": 119.8526,
+        "exit_price": 107.8673,
+        "shares": 1500,
+        "pnl_pct": -0.103236,
+        "pnl_amount": -18583.74,
+        "duration": 1,
+        "reason": "stop_loss"
+      },
+      {
+        "symbol": "300688.SZ",
+        "entry_date": "2026-07-20",
+        "exit_date": "2026-07-21",
+        "entry_price": 19.5,
+        "exit_price": 18.0048,
+        "shares": 9600,
+        "pnl_pct": -0.079997,
+        "pnl_amount": -14994.83,
+        "duration": 1,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "603159.SH",
+        "entry_date": "2026-07-20",
+        "exit_date": "2026-07-21",
+        "entry_price": 18.99,
+        "exit_price": 17.8728,
+        "shares": 9900,
+        "pnl_pct": -0.062215,
+        "pnl_amount": -11711.65,
+        "duration": 1,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "688018.SH",
+        "entry_date": "2026-07-20",
+        "exit_date": "2026-07-24",
+        "entry_price": 103.88,
+        "exit_price": 101.1,
+        "shares": 1800,
+        "pnl_pct": -0.030261,
+        "pnl_amount": -5665.63,
+        "duration": 4,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "002246.SZ",
+        "entry_date": "2026-07-20",
+        "exit_date": "2026-07-27",
+        "entry_price": 17.66,
+        "exit_price": 19.03,
+        "shares": 10700,
+        "pnl_pct": 0.073702,
+        "pnl_amount": 13945.03,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300444.SZ",
+        "entry_date": "2026-07-27",
+        "exit_date": "2026-07-28",
+        "entry_price": 9.5,
+        "exit_price": 10.076,
+        "shares": 19500,
+        "pnl_pct": 0.056818,
+        "pnl_amount": 10539.26,
+        "duration": 1,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "301086.SZ",
+        "entry_date": "2026-07-27",
+        "exit_date": "2026-07-29",
+        "entry_price": 112.21,
+        "exit_price": 101.6136,
+        "shares": 1600,
+        "pnl_pct": -0.097689,
+        "pnl_amount": -17561.57,
+        "duration": 2,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "301085.SZ",
+        "entry_date": "2026-07-27",
+        "exit_date": "2026-07-30",
+        "entry_price": 50.81,
+        "exit_price": 55.4312,
+        "shares": 3600,
+        "pnl_pct": 0.087028,
+        "pnl_amount": 15939.56,
+        "duration": 3,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "603709.SH",
+        "entry_date": "2026-07-27",
+        "exit_date": "2026-08-03",
+        "entry_price": 9.63,
+        "exit_price": 10.58,
+        "shares": 19200,
+        "pnl_pct": 0.0947,
+        "pnl_amount": 17532.42,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300005.SZ",
+        "entry_date": "2026-07-27",
+        "exit_date": "2026-08-03",
+        "entry_price": 9.18,
+        "exit_price": 9.24,
+        "shares": 20100,
+        "pnl_pct": 0.002917,
+        "pnl_amount": 538.95,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688808.SH",
+        "entry_date": "2026-08-03",
+        "exit_date": "2026-08-10",
+        "entry_price": 1074.3259,
+        "exit_price": 1479.0563,
+        "shares": 100,
+        "pnl_pct": 0.37178,
+        "pnl_amount": 39993.19,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688498.SH",
+        "entry_date": "2026-08-03",
+        "exit_date": "2026-08-10",
+        "entry_price": 1087.3729,
+        "exit_price": 1354.7188,
+        "shares": 100,
+        "pnl_pct": 0.241385,
+        "pnl_amount": 26281.64,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300097.SZ",
+        "entry_date": "2026-08-03",
+        "exit_date": "2026-08-10",
+        "entry_price": 7.47,
+        "exit_price": 9.51,
+        "shares": 25100,
+        "pnl_pct": 0.268515,
+        "pnl_amount": 50411.25,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688630.SH",
+        "entry_date": "2026-08-03",
+        "exit_date": "2026-08-10",
+        "entry_price": 322.0,
+        "exit_price": 431.03,
+        "shares": 500,
+        "pnl_pct": 0.33379,
+        "pnl_amount": 53810.01,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002515.SZ",
+        "entry_date": "2026-08-03",
+        "exit_date": "2026-08-10",
+        "entry_price": 6.55,
+        "exit_price": 7.37,
+        "shares": 28700,
+        "pnl_pct": 0.121145,
+        "pnl_amount": 22803.12,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002066.SZ",
+        "entry_date": "2026-08-10",
+        "exit_date": "2026-08-17",
+        "entry_price": 20.52,
+        "exit_price": 21.89,
+        "shares": 10100,
+        "pnl_pct": 0.062929,
+        "pnl_amount": 13059.06,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002285.SZ",
+        "entry_date": "2026-08-10",
+        "exit_date": "2026-08-17",
+        "entry_price": 2.15,
+        "exit_price": 2.14,
+        "shares": 96400,
+        "pnl_pct": -0.00823,
+        "pnl_amount": -1707.92,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300927.SZ",
+        "entry_date": "2026-08-10",
+        "exit_date": "2026-08-17",
+        "entry_price": 21.65,
+        "exit_price": 22.15,
+        "shares": 9500,
+        "pnl_pct": 0.019416,
+        "pnl_amount": 3998.65,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600610.SH",
+        "entry_date": "2026-08-17",
+        "exit_date": "2026-08-21",
+        "entry_price": 7.02,
+        "exit_price": 7.348,
+        "shares": 29800,
+        "pnl_pct": 0.04296,
+        "pnl_amount": 8998.82,
+        "duration": 4,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "002040.SZ",
+        "entry_date": "2026-08-10",
+        "exit_date": "2026-08-24",
+        "entry_price": 8.08,
+        "exit_price": 9.08,
+        "shares": 25600,
+        "pnl_pct": 0.119722,
+        "pnl_amount": 24796.47,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002445.SZ",
+        "entry_date": "2026-08-10",
+        "exit_date": "2026-08-24",
+        "entry_price": 2.95,
+        "exit_price": 3.37,
+        "shares": 70300,
+        "pnl_pct": 0.138266,
+        "pnl_amount": 28711.49,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600691.SH",
+        "entry_date": "2026-08-17",
+        "exit_date": "2026-08-24",
+        "entry_price": 2.43,
+        "exit_price": 2.56,
+        "shares": 86100,
+        "pnl_pct": 0.04971,
+        "pnl_amount": 10414.04,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688175.SH",
+        "entry_date": "2026-08-24",
+        "exit_date": "2026-08-28",
+        "entry_price": 19.45,
+        "exit_price": 19.3512,
+        "shares": 11100,
+        "pnl_pct": -0.008657,
+        "pnl_amount": -1871.39,
+        "duration": 4,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "300082.SZ",
+        "entry_date": "2026-08-17",
+        "exit_date": "2026-08-31",
+        "entry_price": 7.77,
+        "exit_price": 8.5,
+        "shares": 26900,
+        "pnl_pct": 0.090018,
+        "pnl_amount": 18839.39,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002830.SZ",
+        "entry_date": "2026-08-24",
+        "exit_date": "2026-08-31",
+        "entry_price": 13.75,
+        "exit_price": 14.35,
+        "shares": 15700,
+        "pnl_pct": 0.039884,
+        "pnl_amount": 8621.19,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002829.SZ",
+        "entry_date": "2026-08-24",
+        "exit_date": "2026-08-31",
+        "entry_price": 19.7,
+        "exit_price": 19.91,
+        "shares": 10900,
+        "pnl_pct": 0.007026,
+        "pnl_amount": 1510.7,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600336.SH",
+        "entry_date": "2026-08-24",
+        "exit_date": "2026-09-07",
+        "entry_price": 6.17,
+        "exit_price": 6.62,
+        "shares": 35000,
+        "pnl_pct": 0.069076,
+        "pnl_amount": 14936.35,
+        "duration": 10,
+        "reason": "signal"
+      },
+      {
+        "symbol": "605055.SH",
+        "entry_date": "2026-08-31",
+        "exit_date": "2026-09-07",
+        "entry_price": 9.73,
+        "exit_price": 9.52,
+        "shares": 22500,
+        "pnl_pct": -0.0251,
+        "pnl_amount": -5502.24,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "001298.SZ",
+        "entry_date": "2026-08-31",
+        "exit_date": "2026-09-07",
+        "entry_price": 17.45,
+        "exit_price": 18.16,
+        "shares": 12500,
+        "pnl_pct": 0.036946,
+        "pnl_amount": 8069.33,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "605289.SH",
+        "entry_date": "2026-08-31",
+        "exit_date": "2026-09-07",
+        "entry_price": 103.0,
+        "exit_price": 104.0,
+        "shares": 2100,
+        "pnl_pct": 0.006079,
+        "pnl_amount": 1316.49,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688039.SH",
+        "entry_date": "2026-09-07",
+        "exit_date": "2026-09-09",
+        "entry_price": 34.05,
+        "exit_price": 35.2792,
+        "shares": 6400,
+        "pnl_pct": 0.032375,
+        "pnl_amount": 7064.28,
+        "duration": 2,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "605488.SH",
+        "entry_date": "2026-08-31",
+        "exit_date": "2026-09-11",
+        "entry_price": 28.77,
+        "exit_price": 27.1744,
+        "shares": 7600,
+        "pnl_pct": -0.058857,
+        "pnl_amount": -12885.83,
+        "duration": 9,
+        "reason": "trailing_stop"
+      },
+      {
+        "symbol": "300835.SZ",
+        "entry_date": "2026-09-07",
+        "exit_date": "2026-09-14",
+        "entry_price": 160.0,
+        "exit_price": 165.88,
+        "shares": 1300,
+        "pnl_pct": 0.033023,
+        "pnl_amount": 6877.63,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300811.SZ",
+        "entry_date": "2026-09-07",
+        "exit_date": "2026-09-14",
+        "entry_price": 73.95,
+        "exit_price": 80.13,
+        "shares": 2900,
+        "pnl_pct": 0.079674,
+        "pnl_amount": 17108.74,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "688173.SH",
+        "entry_date": "2026-09-07",
+        "exit_date": "2026-09-14",
+        "entry_price": 12.75,
+        "exit_price": 11.85,
+        "shares": 17200,
+        "pnl_pct": -0.07393,
+        "pnl_amount": -16233.87,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "000510.SZ",
+        "entry_date": "2026-09-14",
+        "exit_date": "2026-09-21",
+        "entry_price": 15.87,
+        "exit_price": 18.6,
+        "shares": 13900,
+        "pnl_pct": 0.167809,
+        "pnl_amount": 37065.59,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002565.SZ",
+        "entry_date": "2026-09-14",
+        "exit_date": "2026-09-21",
+        "entry_price": 8.45,
+        "exit_price": 8.95,
+        "shares": 26100,
+        "pnl_pct": 0.055364,
+        "pnl_amount": 12226.02,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600708.SH",
+        "entry_date": "2026-09-14",
+        "exit_date": "2026-09-21",
+        "entry_price": 2.98,
+        "exit_price": 3.02,
+        "shares": 74100,
+        "pnl_pct": 0.009779,
+        "pnl_amount": 2162.24,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "600481.SH",
+        "entry_date": "2026-09-14",
+        "exit_date": "2026-09-21",
+        "entry_price": 4.23,
+        "exit_price": 4.14,
+        "shares": 52200,
+        "pnl_pct": -0.024795,
+        "pnl_amount": -5482.1,
+        "duration": 5,
+        "reason": "signal"
+      },
+      {
+        "symbol": "300007.SZ",
+        "entry_date": "2026-09-21",
+        "exit_date": "2026-09-28",
+        "entry_price": 30.9,
+        "exit_price": 31.28,
+        "shares": 7200,
+        "pnl_pct": 0.008658,
+        "pnl_amount": 1928.79,
+        "duration": 4,
+        "reason": "signal"
+      },
+      {
+        "symbol": "002446.SZ",
+        "entry_date": "2026-09-21",
+        "exit_date": "2026-09-30",
+        "entry_price": 8.14,
+        "exit_price": 7.8,
+        "shares": 27700,
+        "pnl_pct": -0.045214,
+        "pnl_amount": -10208.06,
+        "duration": 6,
+        "reason": "end"
+      },
+      {
+        "symbol": "002358.SZ",
+        "entry_date": "2026-09-21",
+        "exit_date": "2026-09-30",
+        "entry_price": 5.34,
+        "exit_price": 5.13,
+        "shares": 42200,
+        "pnl_pct": -0.04278,
+        "pnl_amount": -9652.87,
+        "duration": 6,
+        "reason": "end"
+      },
+      {
+        "symbol": "600751.SH",
+        "entry_date": "2026-09-21",
+        "exit_date": "2026-09-30",
+        "entry_price": 2.99,
+        "exit_price": 2.86,
+        "shares": 75400,
+        "pnl_pct": -0.046917,
+        "pnl_amount": -10591.07,
+        "duration": 6,
+        "reason": "end"
+      },
+      {
+        "symbol": "601609.SH",
+        "entry_date": "2026-09-28",
+        "exit_date": "2026-09-30",
+        "entry_price": 11.79,
+        "exit_price": 11.55,
+        "shares": 18800,
+        "pnl_pct": -0.023878,
+        "pnl_amount": -5299.57,
+        "duration": 2,
+        "reason": "end"
+      }
+    ]
+  },
+  "tsp_reference": {
+    "total_return": 1.2421,
+    "annual_return": 1.3181,
+    "max_drawdown": -0.0637,
+    "sharpe": 4.73,
+    "run_id": "195530d53f",
+    "n_trades": 215
+  },
+  "diff_vs_tsp": {
+    "total_return": -0.0175,
+    "annual_return": -0.0188,
+    "max_drawdown": -0.0034,
+    "sharpe": -0.07
+  }
+}
