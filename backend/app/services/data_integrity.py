@@ -40,6 +40,17 @@ SCAN_WINDOW_DAYS = 7
 # 自动修复窗口: 最早坏日距今超过 N 个自然日 → 只报告不自动修 (更大缺口由用户手动 repair)
 AUTO_REPAIR_MAX_LAG_DAYS = 5
 
+# 稀疏分区判据: 行数 < 正常基线 * 此比例 → 视为 sparse
+# 正常基线 = 该表族所有历史分区中"行数 >= BASELINE_ROW_FLOOR"的中位数
+SPARSE_RATIO_THRESHOLD = 0.2
+
+# 正常基线计算下限: 行数 < 此值的分区不参与基线估计 (它们本身可能就是 sparse)
+_BASELINE_ROW_FLOOR = {
+    "kline_daily": 1000,
+    "kline_etf_daily": 100,
+    "kline_index_daily": 30,
+}
+
 # 参与检测的日K族表 (实时 flush 会写这三族的 daily/enriched)
 _DAILY_TABLES = ("kline_daily", "kline_etf_daily", "kline_index_daily")
 
@@ -221,6 +232,73 @@ def scan_recent_integrity(
     return issues
 
 
+def scan_historical_sparse_integrity(
+    data_dir: Path,
+    *,
+    today: date | None = None,
+) -> list[IntegrityIssue]:
+    """扫描全部历史分区, 标记行数远低于正常基线的 sparse 分区.
+
+    判据:
+      1. 取该表族所有历史分区中"行数 >= 基线 floor"的分区, 行数中位数作为正常基线
+      2. 行数 < baseline * SPARSE_RATIO_THRESHOLD → 视为 sparse
+
+    代价: 只读 parquet metadata 的 num_rows (不解压数据页), 每分区 ~0.1ms.
+    """
+    import pyarrow.parquet as pq
+
+    data_dir = Path(data_dir)
+    today = today or datetime.now(CN_TZ).date()
+    issues: list[IntegrityIssue] = []
+
+    for table in _DAILY_TABLES:
+        base = data_dir / table
+        if not base.exists():
+            continue
+
+        # 1. 读全部分区的 (date, rows)
+        partition_rows: list[tuple[date, int]] = []
+        for part in sorted(base.glob("date=*")):
+            try:
+                d = date.fromisoformat(part.name[5:])
+            except ValueError:
+                continue
+            part_file = part / "part.parquet"
+            if not part_file.exists():
+                continue
+            try:
+                meta = pq.read_metadata(part_file)
+                n = meta.num_rows
+            except Exception:
+                continue
+            partition_rows.append((d, n))
+
+        if len(partition_rows) < 30:
+            continue
+
+        # 2. 算基线: 取行数 >= floor 的分区的中位数
+        floor = _BASELINE_ROW_FLOOR.get(table, 100)
+        normal = [n for _, n in partition_rows if n >= floor]
+        if len(normal) < 10:
+            continue  # 可用基线分区太少, 保守跳过
+        normal.sort()
+        baseline = normal[len(normal) // 2]
+        threshold = max(20, int(baseline * SPARSE_RATIO_THRESHOLD))
+
+        logger.debug(
+            "sparse scan %s: baseline=%d, threshold=%d, normal_partitions=%d, total_partitions=%d",
+            table, baseline, threshold, len(normal), len(partition_rows),
+        )
+
+        # 3. 标记 sparse 分区
+        for d, n in partition_rows:
+            if n < threshold:
+                issues.append(IntegrityIssue(day=d, table=table, kind="sparse"))
+
+    issues.sort(key=lambda i: (i.day, i.table))
+    return issues
+
+
 def earliest_issue_day(
     issues: list[IntegrityIssue],
     tables: Iterable[str] | None = None,
@@ -276,7 +354,14 @@ def describe_issues(issues: list[IntegrityIssue]) -> str:
     days = sorted({i.day for i in issues})
     day_text = "、".join(d.isoformat() for d in days)
     kinds = {i.kind for i in issues}
-    reason = "停机前的盘中快照" if "snapshot" in kinds else "缺失"
+    reasons = []
+    if "snapshot" in kinds:
+        reasons.append("停机前的盘中快照")
+    if "missing" in kinds:
+        reasons.append("分区缺失")
+    if "sparse" in kinds:
+        reasons.append("稀疏分区(行数远低于全市场基线)")
+    reason = "/".join(reasons) if reasons else "数据异常"
     return f"{day_text} 的数据为{reason}"
 
 
@@ -374,10 +459,14 @@ def launch_integrity_repair(app_state, start_date: date, reason: str) -> tuple[s
 
 
 def boot_integrity_check(app_state) -> None:
-    """启动自检 (后台线程调用): 发现窗口内的坏数据自动创建修复任务。
+    """启动自检 (后台线程调用): 发现窗口内的坏数据自动创建修复任务.
 
     分钟K缺口无需单独处理 — 修复管道 Step 2.5 在 minute_sync_enabled 时
-    以 start=max(datetime) 增量补洞, 天然覆盖停机缺口。
+    以 start=max(datetime) 增量补洞, 天然覆盖停机缺口.
+
+    两级扫描:
+      1. 近 7 天完整性 (snapshot / missing) → 窗口内自动修
+      2. 全历史稀疏分区 → 超出窗口只打 warning 让用户手动修
     """
     repo = getattr(app_state, "repo", None)
     if repo is None:
@@ -387,16 +476,31 @@ def boot_integrity_check(app_state) -> None:
     except Exception as e:  # noqa: BLE001
         logger.warning("boot integrity scan failed: %s", e)
         return
-    if not issues:
+    if issues:
+        earliest = earliest_issue_day(issues)
+        logger.warning("boot integrity check: %s (共 %d 个坏分区)", describe_issues(issues), len(issues))
+        if within_auto_repair_window(earliest):
+            with contextlib.suppress(Exception):
+                launch_integrity_repair(app_state, earliest, "boot_integrity_check")
+        else:
+            logger.warning(
+                "integrity: 最早坏日 %s 超出自动修复窗口(%d 天), 请在数据页手动执行数据修正",
+                earliest, AUTO_REPAIR_MAX_LAG_DAYS,
+            )
+    else:
         logger.info("boot integrity check: 近 %d 个交易日数据完整", SCAN_WINDOW_DAYS)
+
+    # 长窗口稀疏检测 (所有历史分区) — 只报告, 不自动修
+    try:
+        sparse_issues = scan_historical_sparse_integrity(repo.store.data_dir)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("boot sparse integrity scan failed: %s", e)
         return
-    earliest = earliest_issue_day(issues)
-    logger.warning("boot integrity check: %s (共 %d 个坏分区)", describe_issues(issues), len(issues))
-    if not within_auto_repair_window(earliest):
+    if sparse_issues:
+        earliest_sparse = earliest_issue_day(sparse_issues, tables=("kline_daily",))
         logger.warning(
-            "integrity: 最早坏日 %s 超出自动修复窗口(%d 天), 请在数据页手动执行数据修正",
-            earliest, AUTO_REPAIR_MAX_LAG_DAYS,
+            "boot sparse integrity: 发现 %d 个稀疏分区 (行数 < 正常基线的 %d%%), "
+            "最早从 %s 起; 建议在数据页用「数据修正」从此日期起全量重拉.",
+            len(sparse_issues), int(SPARSE_RATIO_THRESHOLD * 100),
+            earliest_sparse,
         )
-        return
-    with contextlib.suppress(Exception):
-        launch_integrity_repair(app_state, earliest, "boot_integrity_check")

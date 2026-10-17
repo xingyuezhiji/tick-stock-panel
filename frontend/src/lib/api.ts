@@ -2782,6 +2782,8 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ start_date: startDate }),
     }),
+  repairRecommendation: () =>
+    request<{ recommended_start_date: string | null; has_issues: boolean; issue_count: number; details: string[] }>('/api/kline/repair_recommendation'),
   rebuildEnriched: () =>
     request<{ status: string; job_id: string }>('/api/kline/rebuild_enriched', {
       method: 'POST',

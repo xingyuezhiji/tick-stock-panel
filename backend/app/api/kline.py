@@ -1493,6 +1493,53 @@ async def extend_history(request: Request):
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
+@router.get("/repair_recommendation")
+async def repair_recommendation(request: Request):
+    """推荐数据修正的起始日期 — 长窗口稀疏分区检测。
+
+    扫描全部历史分区,找出行数远低于全市场基线的 sparse 分区段,
+    返回最早稀疏日期作为 repair_daily 的推荐起点。
+
+    同时合并近 7 天完整性检测 (snapshot / missing),
+    取两者中最早的坏日。
+    """
+    from app.services.data_integrity import (
+        earliest_issue_day,
+        scan_historical_sparse_integrity,
+        scan_recent_integrity,
+    )
+
+    repo = request.app.state.repo
+    data_dir = repo.store.data_dir
+    all_issues: list = []
+    details: list[str] = []
+
+    # 1. 近 7 天完整性
+    recent = scan_recent_integrity(data_dir)
+    if recent:
+        all_issues.extend(recent)
+        kinds = sorted({i.kind for i in recent})
+        details.append(f"近{7}天: {len(recent)} 个坏分区 ({','.join(kinds)})")
+
+    # 2. 全历史稀疏检测
+    sparse = scan_historical_sparse_integrity(data_dir)
+    if sparse:
+        all_issues.extend(sparse)
+        earliest_sparse = earliest_issue_day(sparse, tables=("kline_daily",))
+        details.append(
+            f"全历史: {len(sparse)} 个稀疏分区 (kline_daily 最早 {earliest_sparse})"
+        )
+
+    recommended = earliest_issue_day(all_issues, tables=("kline_daily", "kline_etf_daily"))
+
+    return {
+        "recommended_start_date": recommended.isoformat() if recommended else None,
+        "has_issues": bool(all_issues),
+        "issue_count": len(all_issues),
+        "details": details,
+    }
+
+
 @router.post("/repair_daily")
 async def repair_daily(request: Request):
     """修正 / 补全日K数据 — 从指定起始日期重拉到今天。

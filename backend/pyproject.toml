@@ -20,8 +20,9 @@ dependencies = [
     "pyarrow>=16.0",
     "pandas>=2.2",                # 仅在 BacktestService 边界使用,见 §7.4 / ADR-19
     "psutil>=5.9",                # 独立回测 worker 的峰值 RSS 与退出后内存指标
-    # llvmlite 不再提供 macOS Intel wheel；该平台使用 Matrix 纯 Python fallback。
-    "numba>=0.65.1; sys_platform != 'darwin' or platform_machine != 'x86_64'",
+    # llvmlite 未提供 macOS arm64 wheel；Apple Silicon 使用 Matrix 纯 Python fallback。
+    # macOS x86_64 (Intel) 自 llvmlite 0.43 起恢复 wheel，可正常安装。
+    "numba>=0.60.0; sys_platform != 'darwin' or platform_machine != 'arm64'",
     "fastexcel>=0.10",            # Polars 读取 xlsx/xls
     "pypinyin>=0.50",             # 股票名拼音首字母搜索 (同花顺式 payh → 平安银行)
     # TickFlow 官方 SDK
