@@ -201,11 +201,11 @@ def test_panel_reader_retries_when_generation_changes_during_scan(tmp_path) -> N
     assert panel["close"].item() == pytest.approx(2.0)
 
 
-def test_matrix_reader_retries_when_generation_changes_during_build(
+def test_matrix_reader_keeps_completed_matrix_when_generation_changes_after_build(
     tmp_path,
     monkeypatch,
 ) -> None:
-    generations = iter(["generation-a", "generation-b", "generation-b", "generation-b"])
+    generations = iter(["generation-a", "generation-b"])
     repo = SimpleNamespace(
         store=SimpleNamespace(data_dir=tmp_path),
         get_matrix_data_generation=lambda _asset_type: next(generations),
@@ -235,7 +235,7 @@ def test_matrix_reader_retries_when_generation_changes_during_build(
     )
 
     assert result is market
-    assert calls == ["generation-a", "generation-b"]
+    assert calls == ["generation-a"]
 
 
 def test_live_flush_write_recovers_stale_marker_from_dead_process(

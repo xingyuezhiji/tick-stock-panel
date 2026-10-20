@@ -564,7 +564,14 @@ class BacktestEngine:
                     source_generation=source_generation,
                     cancel_event=cancel_event,
                 )
-                self.assert_data_generation(asset_type, source_generation)
+                try:
+                    self.assert_data_generation(asset_type, source_generation)
+                except EnrichedGenerationUnavailableError:
+                    logger.debug(
+                        "enriched generation changed after matrix read; "
+                        "using the completed matrix snapshot",
+                        exc_info=True,
+                    )
                 from app.backtest.fundamentals import attach_matrix_fundamental_fields
 
                 fundamental_names = sorted(

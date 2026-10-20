@@ -11,9 +11,10 @@ import pytest
 from app.backtest import worker as worker_module
 from app.backtest.mining import benchmark_candidate
 from app.backtest.optimizer import OptimizeConfig
-from app.backtest.strategy import StrategyBacktestConfig
+from app.backtest.strategy import StrategyBacktestConfig, StrategyBacktestResult
 from app.backtest.walkforward import WalkForwardConfig
 from app.backtest.worker import BacktestWorkerError, make_worker_task, run_worker_task
+from app.enriched_generation import EnrichedGenerationUnavailableError
 from app.enriched_generation import bump_enriched_generation, get_enriched_generation
 from app.services.mining_jobs import MiningRunStore
 
@@ -165,6 +166,65 @@ def test_spawn_worker_returns_compact_result_and_memory_metrics(tmp_path):
     assert worker["serialized_result_bytes"] > 0
     assert worker["worker_exitcode"] == 0
     assert worker["parent_rss_after_worker_exit_bytes"] > 0
+
+
+def test_backtest_worker_rereads_snapshot_when_generation_commits_mid_read():
+    class FlakyService:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def run(self, *_args, **_kwargs):
+            self.calls += 1
+            if self.calls == 1:
+                raise EnrichedGenerationUnavailableError("generation changed")
+            return StrategyBacktestResult(
+                run_id="ok",
+                config={},
+                stats={"total_return": 0.1},
+            )
+
+    events: list[dict] = []
+    service = FlakyService()
+
+    result = worker_module._run_backtest_with_generation_retry(
+        service,
+        object(),
+        events.append,
+        None,
+    )
+
+    assert result["run_id"] == "ok"
+    assert service.calls == 2
+    assert events == [{
+        "phase": "data",
+        "label": "数据已更新, 重新读取快照",
+        "attempt": 2,
+        "max_attempts": 3,
+    }]
+
+
+def test_backtest_worker_fails_when_generation_keeps_drifting():
+    class AlwaysDriftingService:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def run(self, *_args, **_kwargs):
+            self.calls += 1
+            raise EnrichedGenerationUnavailableError("generation changed")
+
+    events: list[dict] = []
+    service = AlwaysDriftingService()
+
+    with pytest.raises(EnrichedGenerationUnavailableError):
+        worker_module._run_backtest_with_generation_retry(
+            service,
+            object(),
+            events.append,
+            None,
+        )
+
+    assert service.calls == 3
+    assert [event["attempt"] for event in events] == [2, 3]
 
 
 def test_spawn_optimizer_reuses_one_matrix_and_exits(tmp_path):

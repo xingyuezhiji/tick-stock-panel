@@ -26,6 +26,7 @@ class BacktestWorkerError(RuntimeError):
 
 
 _CANCEL_GRACE_SECONDS = 5.0
+_GENERATION_RETRY_LIMIT = 2
 
 
 class _PeakRssSampler:
@@ -175,6 +176,35 @@ def _error_message(exc: BaseException) -> str:
     return str(exc)
 
 
+def _run_backtest_with_generation_retry(
+    service,
+    config,
+    progress_cb: Callable[[dict], None] | None,
+    cancel_event,
+) -> dict[str, Any]:
+    from app.enriched_generation import EnrichedGenerationUnavailableError
+
+    for attempt in range(_GENERATION_RETRY_LIMIT + 1):
+        try:
+            return asdict(service.run(config, progress_cb, cancel_event))
+        except EnrichedGenerationUnavailableError:
+            if attempt >= _GENERATION_RETRY_LIMIT:
+                raise
+            if cancel_event is not None and cancel_event.is_set():
+                raise
+            if progress_cb is not None:
+                progress_cb({
+                    "phase": "data",
+                    "label": "数据已更新, 重新读取快照",
+                    "attempt": attempt + 2,
+                    "max_attempts": _GENERATION_RETRY_LIMIT + 1,
+                })
+            time.sleep(0.2)
+    raise EnrichedGenerationUnavailableError(
+        "unable to read a stable enriched data snapshot"
+    )
+
+
 def _worker_entry(task: dict[str, Any], event_queue, cancel_event) -> None:
     sampler = _PeakRssSampler()
     sampler.start()
@@ -209,7 +239,12 @@ def _worker_entry(task: dict[str, Any], event_queue, cancel_event) -> None:
         kind = task["kind"]
         if kind == "backtest":
             config = _decode_backtest_config(task["config"])
-            result = asdict(service.run(config, _progress, cancel_event))
+            result = _run_backtest_with_generation_retry(
+                service,
+                config,
+                _progress,
+                cancel_event,
+            )
         elif kind == "optimize":
             config = _decode_optimize_config(task["config"])
             optimizer = StrategyOptimizer(service, strategy_engine)
