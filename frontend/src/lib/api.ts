@@ -391,6 +391,8 @@ export interface ScreenerStrategy {
   name: string
   description: string
   source?: string
+  tags?: string[]
+  asset_types?: string[]
   /** 支持的周期, 如 ['1d'] / ['1m'] (分钟策略) */
   timeframes?: string[]
 }
@@ -3939,7 +3941,7 @@ export const api = {
     request<{ rules: PaperAutoRule[] }>(accUrl('/api/paper/auto_rules', account)),
 
   paperAutoRuleCreate: (body: Omit<PaperAutoRule, 'id' | 'created_at'>, account?: string) =>
-    request<{ rule: PaperAutoRule }>(accUrl('/api/paper/auto_rules', account), {
+    request<{ rule: PaperAutoRule; orders?: PaperOrder[] }>(accUrl('/api/paper/auto_rules', account), {
       method: 'POST',
       body: JSON.stringify(body),
     }),

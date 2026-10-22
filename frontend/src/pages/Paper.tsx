@@ -31,6 +31,13 @@ const AUTO_SIDE_LABEL: Record<string, string> = {
   sell: '卖',
 }
 
+const STRATEGY_SOURCE_META: Record<string, { label: string; className: string }> = {
+  builtin: { label: '内置', className: 'border-accent/25 bg-accent/10 text-accent' },
+  custom: { label: '自定义', className: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-400' },
+  ai: { label: 'AI', className: 'border-amber-400/25 bg-amber-400/10 text-amber-400' },
+  composite: { label: '叠加', className: 'border-teal-500/25 bg-teal-500/10 text-teal-400' },
+}
+
 const STATUS_LABEL: Record<string, string> = {
   pending: '待成交',
   filled: '已成交',
@@ -421,7 +428,7 @@ function OrderForm({ acc, onDone }: { acc: string; onDone: () => void }) {
   })
 
   return (
-    <div className="rounded-card border border-border bg-surface p-4">
+    <div className="min-w-0 rounded-card border border-border bg-surface p-4">
       <div className="text-sm font-medium">下单</div>
       <div className="mt-3 space-y-3">
         <div>
@@ -863,7 +870,7 @@ function AutoRulesPanel({ acc }: { acc: string }) {
     return <AutoRuleForm acc={acc} onDone={() => { setCreating(false); invalidate() }} onCancel={() => setCreating(false)} />
   }
   return (
-    <div className="rounded-card border border-border bg-surface p-4">
+    <div className="min-w-0 rounded-card border border-border bg-surface p-4">
       <div className="flex items-center justify-between">
         <div className="text-sm font-medium">自动跟单规则</div>
         <button onClick={() => setCreating(true)} className="flex items-center gap-1 rounded-btn bg-accent/10 px-2.5 py-1 text-xs text-accent transition-colors hover:bg-accent/20">
@@ -876,31 +883,41 @@ function AutoRulesPanel({ acc }: { acc: string }) {
       {rules.length === 0 ? (
         <div className="py-8 text-center text-xs text-muted">暂无规则 — 新建一条, 让策略信号自动进入模拟盘</div>
       ) : (
-        <div className="mt-2 space-y-1">
+        <div className="mt-2 space-y-1 overflow-hidden">
           {rules.map(r => (
-            <div key={r.id} className="flex items-center gap-2 rounded-btn px-2 py-1.5 text-xs transition-colors hover:bg-elevated/40">
-              <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', r.enabled ? 'bg-bear' : 'bg-muted')} />
-              <span className="w-28 shrink-0 truncate font-medium">{r.name}</span>
-              <span className="w-20 shrink-0 text-muted">{r.match_kind === 'strategy' ? '跟策略' : '跟规则'}</span>
-              <span className="w-32 shrink-0 truncate font-mono text-[11px] text-muted" title={r.match_id}>{r.match_id}</span>
-              <span className={cn(
-                'w-10 shrink-0 font-medium',
-                r.side === 'buy' ? 'text-bull' : r.side === 'sell' ? 'text-bear' : 'text-accent',
-              )}>{AUTO_SIDE_LABEL[r.side] ?? r.side}</span>
-              <span className="w-24 shrink-0 font-mono text-[11px] text-muted">
-                {r.size_mode === 'fixed_amount' ? fmtMoney(r.size_value, 0) : `${r.size_value}% 权益`}
-              </span>
-              <span className="w-16 shrink-0 text-[11px] text-muted">{ORDER_TYPE_LABEL[r.order_type]} · 冷却{r.cooldown_days}天</span>
-              <button
-                onClick={() => toggleM.mutate({ id: r.id, enabled: !r.enabled })}
-                className={cn('ml-auto shrink-0 rounded-btn px-2 py-0.5 text-[10px] transition-colors',
-                  r.enabled ? 'bg-bear/10 text-bear hover:bg-bear/20' : 'bg-elevated text-muted hover:text-secondary')}
-              >
-                {r.enabled ? '停用' : '启用'}
-              </button>
-              <button onClick={() => deleteM.mutate(r.id)} className="shrink-0 rounded p-0.5 text-muted hover:text-danger" title="删除规则">
-                <X className="h-3.5 w-3.5" />
-              </button>
+            <div
+              key={r.id}
+              className="min-w-0 overflow-hidden rounded-btn px-2 py-2 text-xs transition-colors hover:bg-elevated/40"
+            >
+              <div className="flex min-w-0 items-center gap-2">
+                <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', r.enabled ? 'bg-bear' : 'bg-muted')} />
+                <span className="min-w-0 flex-1 truncate font-medium" title={r.name}>{r.name}</span>
+                <span className="shrink-0 text-[11px] text-muted">{r.match_kind === 'strategy' ? '跟策略' : '跟规则'}</span>
+                <button
+                  onClick={() => toggleM.mutate({ id: r.id, enabled: !r.enabled })}
+                  className={cn('shrink-0 rounded-btn px-2 py-0.5 text-[10px] transition-colors',
+                    r.enabled ? 'bg-bear/10 text-bear hover:bg-bear/20' : 'bg-elevated text-muted hover:text-secondary')}
+                >
+                  {r.enabled ? '停用' : '启用'}
+                </button>
+                <button onClick={() => deleteM.mutate(r.id)} className="shrink-0 rounded p-0.5 text-muted hover:text-danger" title="删除规则">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <div className="mt-1 min-w-0 truncate font-mono text-[11px] text-muted" title={r.match_id}>
+                {r.match_id}
+              </div>
+              <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted">
+                <span className={cn(
+                  'shrink-0 font-medium',
+                  r.side === 'buy' ? 'text-bull' : r.side === 'sell' ? 'text-bear' : 'text-accent',
+                )}>{AUTO_SIDE_LABEL[r.side] ?? r.side}</span>
+                <span className="shrink-0 font-mono">
+                  {r.size_mode === 'fixed_amount' ? fmtMoney(r.size_value, 0) : `${r.size_value}% 权益`}
+                </span>
+                <span className="shrink-0">{ORDER_TYPE_LABEL[r.order_type]}</span>
+                <span className="shrink-0">冷却{r.cooldown_days}天</span>
+              </div>
             </div>
           ))}
         </div>
@@ -910,9 +927,11 @@ function AutoRulesPanel({ acc }: { acc: string }) {
 }
 
 function AutoRuleForm({ acc, onDone, onCancel }: { acc: string; onDone: () => void; onCancel: () => void }) {
+  const qc = useQueryClient()
   const [name, setName] = useState('')
   const [matchKind, setMatchKind] = useState<'strategy' | 'rule'>('strategy')
   const [matchId, setMatchId] = useState('')
+  const [strategySource, setStrategySource] = useState('all')
   const [side, setSide] = useState<'follow' | 'buy' | 'sell'>('follow')
   const [sizeMode, setSizeMode] = useState<'fixed_amount' | 'pct_equity'>('fixed_amount')
   const [sizeValue, setSizeValue] = useState('10000')
@@ -933,7 +952,10 @@ function AutoRuleForm({ acc, onDone, onCancel }: { acc: string; onDone: () => vo
         cooldown_days: Number(cooldown),
         enabled: true,
       }, acc),
-    onSuccess: onDone,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: QK.paperAll })
+      onDone()
+    },
     onError: e => setMsg(String((e as Error).message)),
   })
 
@@ -951,16 +973,42 @@ function AutoRuleForm({ acc, onDone, onCancel }: { acc: string; onDone: () => vo
     staleTime: 30_000,
   })
   const idQuery = matchId.trim().toLowerCase()
+  const strategyPresets = strategiesQ.data?.presets ?? []
+  const strategySourceOptions = [
+    { key: 'all', label: '全部', count: strategyPresets.length },
+    ...Object.entries(STRATEGY_SOURCE_META)
+      .map(([key, meta]) => ({
+        key,
+        label: meta.label,
+        count: strategyPresets.filter(s => (s.source ?? 'builtin') === key).length,
+      }))
+      .filter(item => item.count > 0),
+  ]
+  const visibleStrategies = strategyPresets
+    .filter(s => strategySource === 'all' || (s.source ?? 'builtin') === strategySource)
+    .filter(s => !idQuery
+      || s.name.toLowerCase().includes(idQuery)
+      || s.id.toLowerCase().includes(idQuery)
+      || (s.description ?? '').toLowerCase().includes(idQuery)
+      || (s.tags ?? []).some(tag => tag.toLowerCase().includes(idQuery)))
   const idOptions: SuggestOption[] = (() => {
     if (matchKind === 'strategy') {
-      return (strategiesQ.data?.presets ?? [])
-        .filter(s => !idQuery || s.name.toLowerCase().includes(idQuery) || s.id.toLowerCase().includes(idQuery))
+      return visibleStrategies
         .slice(0, 8)
-        .map(s => ({
-          value: s.id,
-          label: s.name || s.id,
-          hint: <span className="shrink-0 font-mono text-[10px] text-muted">{s.id}</span>,
-        }))
+        .map(s => {
+          const source = s.source ?? 'builtin'
+          const sourceMeta = STRATEGY_SOURCE_META[source] ?? { label: source, className: 'border-border bg-elevated text-muted' }
+          return {
+            value: s.id,
+            label: s.name || s.id,
+            hint: (
+              <span className="flex min-w-0 shrink-0 items-center gap-1">
+                <span className={cn('rounded border px-1 py-px text-[9px] leading-none', sourceMeta.className)}>{sourceMeta.label}</span>
+                <span className="max-w-24 truncate font-mono text-[10px] text-muted" title={s.id}>{s.id}</span>
+              </span>
+            ),
+          }
+        })
     }
     return (rulesQ.data?.rules ?? [])
       .filter(r => !idQuery || r.name.toLowerCase().includes(idQuery) || r.id.toLowerCase().includes(idQuery))
@@ -985,7 +1033,7 @@ function AutoRuleForm({ acc, onDone, onCancel }: { acc: string; onDone: () => vo
           <label className="text-[11px] text-muted">跟什么</label>
           <div className="mt-1 flex gap-1.5">
             {(['strategy', 'rule'] as const).map(k => (
-              <button key={k} onClick={() => { setMatchKind(k); setMatchId('') }}
+              <button key={k} onClick={() => { setMatchKind(k); setMatchId(''); setStrategySource('all') }}
                 className={cn('flex-1 rounded-btn border py-1 text-[11px] transition-colors',
                   matchKind === k ? 'border-accent/40 bg-accent/10 text-accent' : 'border-border text-muted hover:text-secondary')}>
                 {k === 'strategy' ? '跟策略' : '跟监控规则'}
@@ -1004,6 +1052,61 @@ function AutoRuleForm({ acc, onDone, onCancel }: { acc: string; onDone: () => vo
             placeholder={matchKind === 'strategy' ? '如: 前高突破 / sg_...' : '如: 高位放量 / mrule_...'}
             className="mt-1 w-full rounded-btn border border-border bg-base px-3 py-1.5 font-mono text-sm outline-none focus:border-accent/50"
           />
+          {matchKind === 'strategy' && (
+            <div className="mt-2">
+              <div className="flex flex-wrap gap-1">
+                {strategySourceOptions.map(item => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => setStrategySource(item.key)}
+                    className={cn(
+                      'rounded-btn border px-2 py-0.5 text-[10px] transition-colors',
+                      strategySource === item.key
+                        ? 'border-accent/40 bg-accent/10 text-accent'
+                        : 'border-border text-muted hover:text-secondary',
+                    )}
+                  >
+                    {item.label} <span className="font-mono opacity-70">{item.count}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-2 grid max-h-44 grid-cols-1 gap-1 overflow-y-auto pr-1">
+                {strategiesQ.isPending ? (
+                  <div className="rounded-btn border border-dashed border-border py-4 text-center text-[11px] text-muted">正在加载策略...</div>
+                ) : visibleStrategies.length === 0 ? (
+                  <div className="rounded-btn border border-dashed border-border py-4 text-center text-[11px] text-muted">没有匹配的策略</div>
+                ) : visibleStrategies.slice(0, 6).map(strategy => {
+                  const active = matchId === strategy.id
+                  const source = strategy.source ?? 'builtin'
+                  const sourceMeta = STRATEGY_SOURCE_META[source] ?? { label: source, className: 'border-border bg-elevated text-muted' }
+                  const summary = strategy.tags?.length
+                    ? strategy.tags.slice(0, 3).join(' · ')
+                    : (strategy.description || strategy.id)
+                  return (
+                    <button
+                      key={strategy.id}
+                      type="button"
+                      onClick={() => setMatchId(strategy.id)}
+                      className={cn(
+                        'flex min-w-0 items-start gap-2 rounded-btn border px-2 py-1.5 text-left transition-colors',
+                        active ? 'border-accent/45 bg-accent/10' : 'border-border bg-base hover:border-accent/25 hover:bg-elevated/50',
+                      )}
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="flex min-w-0 items-center gap-1.5">
+                          <span className={cn('shrink-0 rounded border px-1 py-px text-[9px] leading-none', sourceMeta.className)}>{sourceMeta.label}</span>
+                          <span className="truncate text-xs font-medium text-foreground" title={strategy.name}>{strategy.name || strategy.id}</span>
+                        </span>
+                        <span className="mt-1 block truncate text-[10px] text-muted" title={summary}>{summary}</span>
+                      </span>
+                      <span className="mt-0.5 max-w-20 shrink-0 truncate font-mono text-[9px] text-muted" title={strategy.id}>{strategy.id}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
         <div>
           <label className="text-[11px] text-muted">方向</label>
@@ -1407,7 +1510,7 @@ export function Paper() {
           </div>
 
           {/* 右列: 下单 + 自动跟单 + 策略对比 */}
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <OrderForm acc={accId} onDone={invalidateAll} />
             <AutoRulesPanel acc={accId} />
             <CandidateCompareCard paper={{

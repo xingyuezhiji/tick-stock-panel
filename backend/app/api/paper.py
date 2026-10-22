@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import re
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel
@@ -308,6 +309,132 @@ class AutoRuleModel(BaseModel):
     enabled: bool = True
 
 
+def _sync_monitor_engine(request: Request) -> None:
+    try:
+        from app.api.monitor_rules import _sync_engine
+
+        _sync_engine(request)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("自动跟单同步策略监控失败: %s", e)
+
+
+def _ensure_auto_strategy_monitor(request: Request, strategy_id: str, strategy_name: str | None = None) -> None:
+    """Ensure a type=strategy monitor exists so future polling can emit strategy events."""
+    from app.strategy import monitor_rules
+
+    data_dir = _data_dir(request)
+    rule_id = monitor_rules.strategy_rule_id(strategy_id)
+    existing = monitor_rules.load_one(data_dir, rule_id)
+    notify_events = ["buy_signal", "sell_signal", "pool_entry", "pool_exit"]
+    if existing:
+        rule = dict(existing)
+        rule["enabled"] = True
+        rule["type"] = "strategy"
+        rule["scope"] = "all"
+        rule["strategy_id"] = strategy_id
+        rule["notify_events"] = list(dict.fromkeys([*(rule.get("notify_events") or []), *notify_events]))
+        if strategy_name:
+            rule["name"] = f"策略监控 · {strategy_name}"
+    else:
+        rule = monitor_rules.normalize({
+            "id": rule_id,
+            "name": f"策略监控 · {strategy_name or strategy_id}",
+            "type": "strategy",
+            "scope": "all",
+            "strategy_id": strategy_id,
+            "direction": "entry",
+            "notify_events": notify_events,
+            "conditions": [],
+            "cooldown_seconds": 3600,
+            "enabled": True,
+        })
+    monitor_rules.validate(rule)
+    monitor_rules.save_one(data_dir, rule)
+    _sync_monitor_engine(request)
+
+
+def _row_price(row: dict[str, Any]) -> float | None:
+    for key in ("close", "raw_close", "price", "last_price"):
+        value = row.get(key)
+        try:
+            price = float(value)
+        except (TypeError, ValueError):
+            continue
+        if price > 0:
+            return price
+    return None
+
+
+def _trigger_strategy_auto_orders(request: Request, rule: dict, account_id: str) -> list[dict]:
+    """Run the followed strategy once and submit next-open orders from its current candidates."""
+    if not rule.get("enabled", True) or rule.get("match_kind") != "strategy":
+        return []
+    strategy_id = str(rule.get("match_id") or "")
+    if not strategy_id:
+        return []
+
+    from app.services.screener import ScreenerService
+    from app.strategy import config as strategy_config
+    from app.strategy import paper_auto
+
+    repo = request.app.state.repo
+    strategy_engine = getattr(request.app.state, "strategy_engine", None)
+    if strategy_engine is None:
+        return []
+    svc = ScreenerService(repo, asset_type="stock")
+    as_of = svc.latest_date()
+    if not as_of or not strategy_engine.has(strategy_id):
+        return []
+
+    data_dir = repo.store.data_dir
+    overrides = strategy_config.load_override(data_dir, strategy_id)
+    params = dict(overrides.get("params") or {})
+    context = svc.build_strategy_context(
+        strategy_engine,
+        as_of,
+        [strategy_id],
+        timeframe="1d",
+        params_map={strategy_id: params},
+        overrides_map={strategy_id: overrides or {}},
+    )
+    result = strategy_engine.run(
+        strategy_id,
+        context,
+        pool=None,
+        params=params,
+        overrides=overrides or None,
+    )
+    by_symbol: dict[str, dict[str, Any]] = {
+        str(row.get("symbol") or ""): row
+        for row in result.rows
+        if row.get("symbol")
+    }
+    candidates = result.entry_signal_hits or result.rows
+    events: list[dict] = []
+    seen: set[str] = set()
+    for item in candidates:
+        symbol = str(item.get("symbol") or "")
+        if not symbol or symbol in seen:
+            continue
+        seen.add(symbol)
+        row = {**by_symbol.get(symbol, {}), **item}
+        price = _row_price(row)
+        if price is None:
+            continue
+        events.append({
+            "source": "strategy",
+            "type": "buy_signal" if result.entry_signal_hits else "pool_entry",
+            "rule_id": f"auto_snapshot:{rule['id']}",
+            "rule_name": rule.get("name", ""),
+            "strategy_id": strategy_id,
+            "symbol": symbol,
+            "name": row.get("name"),
+            "price": price,
+            "change_pct": row.get("change_pct"),
+        })
+    return paper_auto.on_rule_events(data_dir, events, account_id=account_id)
+
+
 @router.get("/auto_rules")
 def list_auto_rules(request: Request, account: str = Query(paper.DEFAULT_ACCOUNT_ID)):
     from app.strategy import paper_auto
@@ -317,20 +444,40 @@ def list_auto_rules(request: Request, account: str = Query(paper.DEFAULT_ACCOUNT
 @router.post("/auto_rules")
 def create_auto_rule(request: Request, body: AutoRuleModel, account: str = Query(paper.DEFAULT_ACCOUNT_ID)):
     from app.strategy import paper_auto
+    created_orders: list[dict] = []
+    account_id = _acc(request, account)
     try:
-        rule = paper_auto.create_auto_rule(_data_dir(request), body.model_dump(), _acc(request, account))
+        rule = paper_auto.create_auto_rule(_data_dir(request), body.model_dump(), account_id)
+        if rule.get("match_kind") == "strategy":
+            strategy_name = None
+            strategy_engine = getattr(request.app.state, "strategy_engine", None)
+            if strategy_engine is not None and strategy_engine.has(str(rule.get("match_id"))):
+                strategy = strategy_engine.get(str(rule.get("match_id")))
+                strategy_name = strategy.meta.get("name") or strategy.meta.get("id")
+            _ensure_auto_strategy_monitor(request, str(rule.get("match_id")), strategy_name)
+            created_orders = _trigger_strategy_auto_orders(request, rule, account_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    return {"rule": rule}
+    return {"rule": rule, "orders": created_orders}
 
 
 @router.post("/auto_rules/{rule_id}/enabled")
 def set_auto_rule_enabled(request: Request, rule_id: str, enabled: bool, account: str = Query(paper.DEFAULT_ACCOUNT_ID)):
     from app.strategy import paper_auto
-    rule = paper_auto.set_enabled(_data_dir(request), rule_id, enabled, _acc(request, account))
+    account_id = _acc(request, account)
+    rule = paper_auto.set_enabled(_data_dir(request), rule_id, enabled, account_id)
     if rule is None:
         raise HTTPException(status_code=404, detail=f"规则不存在: {rule_id}")
-    return {"rule": rule}
+    created_orders: list[dict] = []
+    if enabled and rule.get("match_kind") == "strategy":
+        strategy_name = None
+        strategy_engine = getattr(request.app.state, "strategy_engine", None)
+        if strategy_engine is not None and strategy_engine.has(str(rule.get("match_id"))):
+            strategy = strategy_engine.get(str(rule.get("match_id")))
+            strategy_name = strategy.meta.get("name") or strategy.meta.get("id")
+        _ensure_auto_strategy_monitor(request, str(rule.get("match_id")), strategy_name)
+        created_orders = _trigger_strategy_auto_orders(request, rule, account_id)
+    return {"rule": rule, "orders": created_orders}
 
 
 @router.delete("/auto_rules/{rule_id}")

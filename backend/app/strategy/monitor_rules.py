@@ -14,6 +14,7 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import math
@@ -414,8 +415,14 @@ STRATEGY_RULE_PREFIX = "mr_strategy_"
 
 
 def strategy_rule_id(strategy_id: str) -> str:
-    """策略监控规则 id = mr_strategy_{strategy_id}。"""
-    return f"{STRATEGY_RULE_PREFIX}{strategy_id}"
+    """Build a stable monitor-rule ID that always satisfies ``ID_RE``."""
+    safe_strategy_id = re.sub(r"[^a-z0-9_]", "_", strategy_id.lower())
+    candidate = f"{STRATEGY_RULE_PREFIX}{safe_strategy_id}"
+    if len(candidate) <= 40:
+        return candidate
+    digest = hashlib.sha1(strategy_id.encode("utf-8")).hexdigest()[:8]
+    prefix_budget = 40 - len(STRATEGY_RULE_PREFIX) - len(digest) - 1
+    return f"{STRATEGY_RULE_PREFIX}{safe_strategy_id[:prefix_budget]}_{digest}"
 
 
 def migrate_strategy_monitors(data_dir: Path, strategy_ids: list[str], strategy_names: dict[str, str]) -> list[dict]:

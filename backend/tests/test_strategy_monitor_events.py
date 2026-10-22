@@ -116,6 +116,19 @@ def test_strategy_rule_compatibility_and_validation(tmp_path):
     assert normalized["webhook_channels"] == ["feishu", "custom", "email"]
 
 
+def test_strategy_rule_id_bounds_long_strategy_ids():
+    short_id = "boll_breakout"
+    long_id = "ai_alphagpt_round944_c02_delay_cv_max3"
+
+    assert monitor_rules.strategy_rule_id(short_id) == "mr_strategy_boll_breakout"
+
+    rule_id = monitor_rules.strategy_rule_id(long_id)
+    assert len(rule_id) <= 40
+    assert monitor_rules.ID_RE.fullmatch(rule_id)
+    assert rule_id == monitor_rules.strategy_rule_id(long_id)
+    assert rule_id != monitor_rules.strategy_rule_id(f"{long_id}_other")
+
+
 def test_strategy_score_range_filters_pool_and_buy_signals_but_not_sell_signals():
     day = date(2026, 7, 24)
     engine = MonitorRuleEngine()
