@@ -116,6 +116,28 @@ def _rolling_max(values: np.ndarray, window: int) -> np.ndarray:
     return out
 
 
+def _rolling_min(values: np.ndarray, window: int) -> np.ndarray:
+    out = np.full(values.shape, np.nan, dtype=np.float32)
+    for time_id in range(values.shape[0]):
+        start = max(0, time_id - window + 1)
+        out[time_id] = np.nanmin(values[start : time_id + 1], axis=0)
+    return out
+
+
+def _rolling_mean(values: np.ndarray, window: int) -> np.ndarray:
+    out = np.full(values.shape, np.nan, dtype=np.float32)
+    for time_id in range(values.shape[0]):
+        start = max(0, time_id - window + 1)
+        out[time_id] = np.nanmean(values[start : time_id + 1], axis=0)
+    return out
+
+
+def _ema_feature(values: np.ndarray, window: int) -> np.ndarray:
+    valid = np.isfinite(values)
+    filled = np.nan_to_num(values, nan=0.0, posinf=0.0, neginf=0.0).astype(np.float32)
+    return _matrix_ema(filled, valid, window).astype(np.float32)
+
+
 def _max3(values: np.ndarray) -> np.ndarray:
     return np.maximum(values, np.maximum(_delay1(values), _delay2(values))).astype(np.float32)
 
@@ -338,6 +360,14 @@ def evaluate_rpn_formula(tokens: tuple[str, ...], features: dict[str, np.ndarray
             stack.append(_ts_jump(stack.pop()))
         elif token == "DECAY":
             stack.append(_decay(stack.pop()))
+        elif token == "TS_MEAN_10":
+            stack.append(_rolling_mean(stack.pop(), 10))
+        elif token == "TS_MIN_20":
+            stack.append(_rolling_min(stack.pop(), 20))
+        elif token == "CS_SCALE":
+            stack.append(_cs_robust_norm(stack.pop()))
+        elif token == "EMA_20":
+            stack.append(_ema_feature(stack.pop(), 20))
         elif token == "DELAY1":
             stack.append(_delay1(stack.pop()))
         elif token == "MAX3":
