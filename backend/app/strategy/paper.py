@@ -384,8 +384,10 @@ def create_order(
             if qty <= 0:
                 return None, f"金额不足以买一手 (参考价 {ref_price})"
         qty = int(qty)
-        if qty <= 0 or qty % LOT_SIZE != 0:
-            return None, f"数量必须是 {LOT_SIZE} 的整数倍"
+        if qty <= 0:
+            return None, "数量必须为正数"
+        if side == "buy" and qty % LOT_SIZE != 0:
+            return None, f"买入数量必须是 {LOT_SIZE} 的整数倍"
 
         acc_cash = float(acc["cash"])
         if side == "buy":

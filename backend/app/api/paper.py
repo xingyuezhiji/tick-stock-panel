@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import re
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +23,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/paper", tags=["paper"])
 
 _BARE_A_SYMBOL_RE = re.compile(r"^\d{6}$")
+_DATE_DIR_RE = re.compile(r"^date=(\d{4}-\d{2}-\d{2})$")
 
 
 def _normalize_order_symbol(symbol: str) -> str:
@@ -365,74 +367,193 @@ def _row_price(row: dict[str, Any]) -> float | None:
     return None
 
 
+def _local_trading_days(data_dir: Path) -> list[date]:
+    """Local kline daily partition dates as known trading days, sorted ascending."""
+    root = data_dir / "kline_daily"
+    out: list[date] = []
+    try:
+        for item in root.iterdir():
+            match = _DATE_DIR_RE.match(item.name)
+            if not item.is_dir() or match is None:
+                continue
+            try:
+                out.append(date.fromisoformat(match.group(1)))
+            except ValueError:
+                continue
+    except OSError:
+        return []
+    return sorted(set(out))
+
+
+def _trading_day_distance(data_dir: Path, start: date, end: date) -> int:
+    """Number of local trading bars after start through end."""
+    if end <= start:
+        return 0
+    days = _local_trading_days(data_dir)
+    if not days:
+        return (end - start).days
+    try:
+        return max(0, days.index(end) - days.index(start))
+    except ValueError:
+        return sum(1 for day in days if start < day <= end)
+
+
+def _parse_date(value: Any) -> date | None:
+    if isinstance(value, date):
+        return value
+    if not value:
+        return None
+    try:
+        return date.fromisoformat(str(value)[:10])
+    except ValueError:
+        return None
+
+
+def _strategy_cycle_days(data_dir: Path, strategy_engine, strategy_id: str) -> int:
+    from app.strategy import config as strategy_config
+
+    strategy = strategy_engine.get(strategy_id)
+    overrides = strategy_config.load_override(data_dir, strategy_id) or {}
+    value = overrides.get("max_hold_days", strategy.max_hold_days)
+    try:
+        days = int(value)
+    except (TypeError, ValueError):
+        days = 5
+    return max(1, days)
+
+
+def _last_strategy_cycle_date(data_dir: Path, rule: dict, account_id: str) -> date | None:
+    explicit = _parse_date(rule.get("last_cycle_at"))
+    if explicit is not None:
+        return explicit
+    prefix = f"auto:{rule['id']}"
+    last: date | None = None
+    for order in paper.load_orders(data_dir, account_id):
+        if order.get("source") != prefix:
+            continue
+        created = _parse_date(order.get("created_at"))
+        if created is not None and (last is None or created > last):
+            last = created
+    return last
+
+
+def _strategy_cycle_due(data_dir: Path, rule: dict, account_id: str, run_date: date, cycle_days: int) -> bool:
+    last = _last_strategy_cycle_date(data_dir, rule, account_id)
+    return last is None or _trading_day_distance(data_dir, last, run_date) >= cycle_days
+
+
+def _matured_available_qty(data_dir: Path, position: dict, run_date: date, cycle_days: int) -> int:
+    today = paper.cn_today().isoformat()
+    qty = 0
+    for lot in position.get("lots", []) or []:
+        lot_date = _parse_date(lot.get("date"))
+        if lot_date is None or lot_date >= date.fromisoformat(today):
+            continue
+        if _trading_day_distance(data_dir, lot_date, run_date) >= cycle_days:
+            try:
+                qty += int(float(lot.get("qty") or 0))
+            except (TypeError, ValueError):
+                continue
+    return max(0, qty)
+
+
 def _trigger_strategy_auto_orders(request: Request, rule: dict, account_id: str) -> list[dict]:
-    """Run the followed strategy once and submit next-open orders from its current candidates."""
+    """Run the followed strategy on its own cycle and submit next-open rebalance orders."""
     if not rule.get("enabled", True) or rule.get("match_kind") != "strategy":
+        logger.info("paper auto strategy trigger skipped: disabled or non-strategy rule=%s", rule.get("id"))
         return []
     strategy_id = str(rule.get("match_id") or "")
     if not strategy_id:
+        logger.info("paper auto strategy trigger skipped: empty strategy id rule=%s", rule.get("id"))
         return []
 
-    from app.services.screener import ScreenerService
-    from app.strategy import config as strategy_config
+    from app.strategy import live as live_strategy
     from app.strategy import paper_auto
 
     repo = request.app.state.repo
     strategy_engine = getattr(request.app.state, "strategy_engine", None)
     if strategy_engine is None:
+        logger.info("paper auto strategy trigger skipped: strategy engine not ready rule=%s", rule.get("id"))
         return []
-    svc = ScreenerService(repo, asset_type="stock")
-    as_of = svc.latest_date()
-    if not as_of or not strategy_engine.has(strategy_id):
+    if not strategy_engine.has(strategy_id):
+        logger.info("paper auto strategy trigger skipped: has_strategy=%s strategy=%s rule=%s", strategy_engine.has(strategy_id), strategy_id, rule.get("id"))
+        return []
+    data_dir = repo.store.data_dir
+    cycle_days = _strategy_cycle_days(data_dir, strategy_engine, strategy_id)
+    try:
+        pool = live_strategy.build_strategy_pool(
+            repo,
+            strategy_engine,
+            strategy_id=strategy_id,
+            account_id=account_id,
+            asset_type="stock",
+            timeframe="1d",
+        )
+    except ValueError as e:
+        logger.info("paper auto strategy trigger skipped: %s rule=%s", e, rule.get("id"))
+        return []
+    run_date = _parse_date(pool.get("as_of")) or paper.cn_today()
+    if not _strategy_cycle_due(data_dir, rule, account_id, run_date, cycle_days):
+        last = _last_strategy_cycle_date(data_dir, rule, account_id)
+        logger.info(
+            "paper auto strategy trigger skipped: rule=%s account=%s strategy=%s as_of=%s cycle_days=%d last_cycle_at=%s",
+            rule.get("id"), account_id, strategy_id, pool.get("as_of"), cycle_days, last.isoformat() if last else None,
+        )
         return []
 
-    data_dir = repo.store.data_dir
-    overrides = strategy_config.load_override(data_dir, strategy_id)
-    params = dict(overrides.get("params") or {})
-    context = svc.build_strategy_context(
-        strategy_engine,
-        as_of,
-        [strategy_id],
-        timeframe="1d",
-        params_map={strategy_id: params},
-        overrides_map={strategy_id: overrides or {}},
-    )
-    result = strategy_engine.run(
-        strategy_id,
-        context,
-        pool=None,
-        params=params,
-        overrides=overrides or None,
-    )
-    by_symbol: dict[str, dict[str, Any]] = {
-        str(row.get("symbol") or ""): row
-        for row in result.rows
-        if row.get("symbol")
-    }
-    candidates = result.entry_signal_hits or result.rows
     events: list[dict] = []
-    seen: set[str] = set()
-    for item in candidates:
-        symbol = str(item.get("symbol") or "")
-        if not symbol or symbol in seen:
+    positions = paper.load_positions(data_dir, account_id)
+    for holding in pool.get("holdings") or []:
+        symbol = str(holding.get("symbol") or "")
+        position = positions.get(symbol)
+        price = holding.get("last_price")
+        if not symbol or not position or price is None or price <= 0:
             continue
-        seen.add(symbol)
-        row = {**by_symbol.get(symbol, {}), **item}
-        price = _row_price(row)
-        if price is None:
+        qty = _matured_available_qty(data_dir, position, run_date, cycle_days)
+        if qty <= 0:
             continue
         events.append({
             "source": "strategy",
-            "type": "buy_signal" if result.entry_signal_hits else "pool_entry",
+            "type": "pool_exit",
             "rule_id": f"auto_snapshot:{rule['id']}",
             "rule_name": rule.get("name", ""),
             "strategy_id": strategy_id,
             "symbol": symbol,
-            "name": row.get("name"),
+            "name": holding.get("name"),
             "price": price,
-            "change_pct": row.get("change_pct"),
+            "qty": qty,
         })
-    return paper_auto.on_rule_events(data_dir, events, account_id=account_id)
+    seen: set[str] = set()
+    for item in pool.get("candidates") or []:
+        symbol = str(item.get("symbol") or "")
+        if item.get("in_position"):
+            continue
+        if not symbol or symbol in seen:
+            continue
+        seen.add(symbol)
+        price = _row_price(item)
+        if price is None:
+            continue
+        events.append({
+            "source": "strategy",
+            "type": "pool_entry",
+            "rule_id": f"auto_snapshot:{rule['id']}",
+            "rule_name": rule.get("name", ""),
+            "strategy_id": strategy_id,
+            "symbol": symbol,
+            "name": item.get("name"),
+            "price": price,
+            "change_pct": item.get("change_pct"),
+        })
+    created = paper_auto.on_rule_events(data_dir, events, account_id=account_id)
+    rule = dict(rule)
+    rule["last_cycle_at"] = run_date.isoformat()
+    paper_auto.save_auto_rule(data_dir, rule, account_id)
+    logger.info(
+        "paper auto strategy trigger done: rule=%s account=%s strategy=%s as_of=%s cycle_days=%d candidates=%d holdings=%d events=%d created=%d",
+        rule.get("id"), account_id, strategy_id, pool.get("as_of"), cycle_days, len(pool.get("candidates") or []), len(pool.get("holdings") or []), len(events), len(created),
+    )
+    return created
 
 
 @router.get("/auto_rules")

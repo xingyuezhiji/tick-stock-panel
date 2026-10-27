@@ -63,6 +63,38 @@ class SellOutOfBufferRequest(BaseModel):
     order_type: Literal["market", "next_open", "close"] = "next_open"
 
 
+class CreateQmtOrderPlanRequest(BaseModel):
+    strategy_id: str
+    buy_symbols: list[str] = Field(default_factory=list)
+    sell_symbols: list[str] = Field(default_factory=list)
+    account: str = paper.DEFAULT_ACCOUNT_ID
+    as_of: date | None = None
+    asset_type: str = "stock"
+    timeframe: str = "1d"
+    top_n: int | None = Field(default=None, ge=1)
+    buffer_n: int | None = Field(default=None, ge=1)
+    amount_per_symbol: float = Field(default=live.DEFAULT_QMT_AMOUNT_PER_SYMBOL, gt=0)
+
+
+class QmtOrderPlanResponse(BaseModel):
+    plan_id: str
+    mode: Literal["preview"]
+    generated_at: str | None = None
+    trade_date: str
+    strategy_id: str
+    strategy_name: str
+    account: str
+    asset_type: str
+    timeframe: str
+    top_n: int
+    buffer_n: int
+    max_hold_days: int | None = None
+    amount_per_symbol: float
+    orders: list[dict]
+    skipped: list[dict]
+    notice: str
+
+
 @router.get("/brokers")
 def brokers():
     return {"brokers": broker_summaries()}
@@ -93,6 +125,28 @@ def strategy_pool(
             timeframe=timeframe,
             top_n=top_n,
             buffer_n=buffer_n,
+        )
+    except ValueError as e:
+        raise _handle_value_error(e) from e
+
+
+@router.get("/qmt/order-plan/latest", response_model=QmtOrderPlanResponse)
+def qmt_order_plan_latest(
+    request: Request,
+    strategy_id: str = Query(""),
+    account: str = Query(paper.DEFAULT_ACCOUNT_ID),
+):
+    return live.load_qmt_order_plan(_data_dir(request), strategy_id=strategy_id, account=account)
+
+
+@router.post("/qmt/order-plan", response_model=QmtOrderPlanResponse)
+def create_qmt_order_plan(request: Request, body: CreateQmtOrderPlanRequest):
+    try:
+        return live.create_manual_qmt_order_plan(
+            _data_dir(request),
+            request.app.state.repo,
+            _engine(request),
+            body.model_dump(),
         )
     except ValueError as e:
         raise _handle_value_error(e) from e

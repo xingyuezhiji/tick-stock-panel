@@ -151,14 +151,16 @@ def _resolve_order_side(rule: dict, ev: dict) -> str | None:
     return None
 
 
-def _in_cooldown(data_dir: Path, rule: dict, symbol: str, cooldown_days: int, account_id: str) -> bool:
-    """同规则同 symbol 最近一次自动下单是否仍在冷却期 (按日历日, 含当日)。"""
+def _in_cooldown(data_dir: Path, rule: dict, symbol: str, cooldown_days: int, account_id: str, side: str | None = None) -> bool:
+    """同规则同 symbol 同方向最近一次自动下单是否仍在冷却期 (按日历日, 含当日)。"""
     if cooldown_days <= 0:
         return False
     prefix = f"auto:{rule['id']}"
     today = cn_now().date()
     for order in paper.load_orders(data_dir, account_id):
         if order.get("source") != prefix or order.get("symbol") != symbol:
+            continue
+        if side is not None and order.get("side") != side:
             continue
         try:
             created = _date.fromisoformat(order["created_at"][:10])
@@ -182,6 +184,17 @@ def _sizing_qty(data_dir: Path, rule: dict, ref_price: float, account_id: str) -
         equity = nav_rows[-1]["nav"] if nav_rows else float(acc["cash"])
         amount = equity * float(rule["size_value"]) / 100.0
     return paper.qty_from_amount(amount, ref_price)
+
+
+def _event_qty(ev: dict) -> int | None:
+    qty = ev.get("qty")
+    if qty is None:
+        return None
+    try:
+        value = int(float(qty))
+    except (TypeError, ValueError):
+        return None
+    return value if value > 0 else None
 
 
 def on_rule_events(data_dir: Path, events: list[dict], account_id: str = paper.DEFAULT_ACCOUNT_ID) -> list[dict]:
@@ -209,9 +222,11 @@ def on_rule_events(data_dir: Path, events: list[dict], account_id: str = paper.D
                 if side is None:
                     logger.info("paper auto %s: 事件 %s 无法推导买卖方向, 跳过", rule["name"], ev.get("type"))
                     continue
-                if _in_cooldown(data_dir, rule, symbol, int(rule.get("cooldown_days", 0)), account_id):
+                if _in_cooldown(data_dir, rule, symbol, int(rule.get("cooldown_days", 0)), account_id, side):
                     continue
-                qty = _sizing_qty(data_dir, rule, float(price), account_id)
+                qty = _event_qty(ev) if side == "sell" else None
+                if qty is None:
+                    qty = _sizing_qty(data_dir, rule, float(price), account_id)
                 if qty <= 0:
                     logger.info("paper auto %s: %s 金额不足以一手 (价 %s)", rule["name"], symbol, price)
                     continue

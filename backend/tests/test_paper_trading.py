@@ -99,6 +99,37 @@ def test_create_order_rejects_bad_qty_and_insufficient_cash(tmp_path):
     assert "资金不足" in err
 
 
+def test_create_order_allows_odd_lot_sell(tmp_path, monkeypatch):
+    day = date(2026, 9, 24)
+    monkeypatch.setattr(paper, "cn_today", lambda: day)
+    _cap_account(tmp_path, 100_000.0)
+    _write_daily(tmp_path, [(day - timedelta(days=1), 10.0, 10.0)])
+    buy_order, err = paper.create_order(tmp_path, SYM, "buy", qty=300, ref_price=10.0)
+    assert err is None
+    assert len(paper.evaluate_intraday(tmp_path, {SYM: 10.0})) == 1
+    monkeypatch.setattr(paper, "cn_today", lambda: day + timedelta(days=1))
+    paper._append_fill(tmp_path, {
+        "seq": 1,
+        "ts": datetime.combine(day - timedelta(days=1), time(10, 0), tzinfo=CN_TZ).isoformat(),
+        "date": (day - timedelta(days=1)).isoformat(),
+        "order_id": buy_order["id"],
+        "symbol": SYM,
+        "asset_type": "stock",
+        "side": "buy",
+        "qty": 4,
+        "price": 10.0,
+        "fee": 0.0,
+        "kind": "fill",
+    })
+    paper._materialize(tmp_path)
+
+    sell, err = paper.create_order(tmp_path, SYM, "sell", qty=304)
+
+    assert err is None
+    assert sell["status"] == "pending"
+    assert sell["qty"] == 304
+
+
 def test_create_order_etf_market_converts_to_next_open(tmp_path):
     _cap_account(tmp_path)
     order, err = paper.create_order(
@@ -454,6 +485,79 @@ def test_auto_trigger_matches_strategy_event(tmp_path, monkeypatch):
         paper.save_order(tmp_path, o)
     orders2 = paper_auto.on_rule_events(tmp_path, [ev])
     assert len(orders2) == 1
+
+
+def test_auto_follow_sell_uses_event_qty(tmp_path, monkeypatch):
+    from app.strategy import paper_auto
+    captured: list[dict] = []
+
+    def fake_create_order(data_dir, symbol, side, *, account_id, qty, order_type, ref_price, source, **kwargs):
+        order = {
+            "id": "order_test_sell",
+            "symbol": symbol,
+            "side": side,
+            "qty": qty,
+            "order_type": order_type,
+            "ref_price": ref_price,
+            "source": source,
+        }
+        captured.append(order)
+        return order, None
+
+    monkeypatch.setattr(paper, "create_order", fake_create_order)
+    _cap_account(tmp_path)
+    paper_auto.create_auto_rule(tmp_path, _auto_rule(side="follow"))
+    ev = {
+        "source": "strategy",
+        "strategy_id": "strat_1",
+        "type": "pool_exit",
+        "symbol": SYM,
+        "price": 10.0,
+        "qty": 1300,
+    }
+
+    orders = paper_auto.on_rule_events(tmp_path, [ev])
+
+    assert len(orders) == 1
+    assert captured[0]["side"] == "sell"
+    assert captured[0]["qty"] == 1300
+
+
+def test_strategy_cycle_due_uses_local_trading_days(tmp_path):
+    from app.api import paper as paper_api
+
+    days = [date(2026, 9, 21) + timedelta(days=i) for i in range(7)]
+    trade_days = [d for d in days if d.weekday() < 5]
+    _write_daily(tmp_path, [(d, 10.0, 10.0) for d in trade_days])
+    rule = {"id": "arule_cycle", "last_cycle_at": "2026-09-21"}
+
+    assert paper_api._strategy_cycle_due(tmp_path, rule, "default", date(2026, 9, 25), 4) is True
+    assert paper_api._strategy_cycle_due(tmp_path, rule, "default", date(2026, 9, 25), 5) is False
+
+
+def test_matured_available_qty_counts_only_lots_reaching_strategy_cycle(tmp_path, monkeypatch):
+    from app.api import paper as paper_api
+
+    trade_days = [
+        date(2026, 9, 22),
+        date(2026, 9, 23),
+        date(2026, 9, 24),
+        date(2026, 9, 25),
+        date(2026, 9, 28),
+    ]
+    _write_daily(tmp_path, [(d, 10.0, 10.0) for d in trade_days])
+    monkeypatch.setattr(paper, "cn_today", lambda: date(2026, 9, 28))
+    position = {
+        "lots": [
+            {"date": "2026-09-22", "qty": 300},
+            {"date": "2026-09-25", "qty": 200},
+            {"date": "2026-09-28", "qty": 100},
+        ],
+    }
+
+    qty = paper_api._matured_available_qty(tmp_path, position, date(2026, 9, 28), 4)
+
+    assert qty == 300
 
 
 def test_auto_trigger_non_matching_events_ignored(tmp_path):

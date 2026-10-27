@@ -1193,6 +1193,10 @@ export interface LiveHoldingRow extends PaperHolding {
   name?: string
   rank?: number | null
   in_buffer: boolean
+  max_hold_days?: number
+  hold_days?: number
+  cycle_sell_qty?: number
+  cycle_sellable?: boolean
   suggested_action: 'sell' | 'hold'
   [key: string]: any
 }
@@ -1206,6 +1210,7 @@ export interface LiveStrategyPool {
   timeframe: string
   top_n: number
   buffer_n: number
+  max_hold_days?: number
   total: number
   buy_symbols: string[]
   buffer_symbols: string[]
@@ -1231,6 +1236,35 @@ export interface LiveOrderBatchResult {
   created: PaperOrder[]
   skipped: LiveOrderSkipped[]
   errors: LiveOrderError[]
+}
+
+export interface LiveQmtOrderPlan {
+  plan_id: string
+  mode: 'preview'
+  generated_at?: string | null
+  trade_date: string
+  strategy_id: string
+  strategy_name: string
+  account: string
+  asset_type: string
+  timeframe: string
+  top_n: number
+  buffer_n: number
+  max_hold_days?: number
+  amount_per_symbol: number
+  orders: Array<{
+    symbol: string
+    name?: string
+    side: 'buy' | 'sell'
+    qty: number
+    amount?: number | null
+    ref_price?: number | null
+    price_type?: string
+    rank?: number | null
+    reason?: string
+  }>
+  skipped: LiveOrderSkipped[]
+  notice: string
 }
 
 export interface LivePoolParams {
@@ -3980,6 +4014,24 @@ export const api = {
 
   liveSellOutOfBuffer: (body: LiveSellOutOfBufferRequest) =>
     request<LiveOrderBatchResult>('/api/live/orders/sell-out-of-buffer', {
+      method: 'POST',
+      timeoutMs: COMPUTE_REQUEST_TIMEOUT_MS,
+      body: JSON.stringify(body),
+    }),
+
+  liveCreateQmtOrderPlan: (body: {
+    strategy_id: string
+    buy_symbols: string[]
+    sell_symbols: string[]
+    account?: string
+    as_of?: string
+    asset_type?: string
+    timeframe?: string
+    top_n?: number
+    buffer_n?: number
+    amount_per_symbol?: number
+  }) =>
+    request<LiveQmtOrderPlan>('/api/live/qmt/order-plan', {
       method: 'POST',
       timeoutMs: COMPUTE_REQUEST_TIMEOUT_MS,
       body: JSON.stringify(body),

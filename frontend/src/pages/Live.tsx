@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { AlertTriangle, CheckCircle2, RefreshCcw, ShieldCheck, ShoppingCart, TrendingDown } from 'lucide-react'
-import { api, type LiveOrderBatchResult } from '@/lib/api'
+import { AlertTriangle, CheckCircle2, FileText, RefreshCcw, ShieldCheck, ShoppingCart, TrendingDown } from 'lucide-react'
+import { api, type LiveOrderBatchResult, type LiveQmtOrderPlan, type PaperAutoRule } from '@/lib/api'
 import { QK } from '@/lib/queryKeys'
 import { cn } from '@/lib/cn'
 import { priceColorClass } from '@/lib/format'
@@ -73,6 +73,43 @@ function ResultPanel({ result }: { result: LiveOrderBatchResult | null }) {
   )
 }
 
+function QmtPlanPanel({ plan }: { plan: LiveQmtOrderPlan | null }) {
+  if (!plan) return null
+  return (
+    <section className="rounded-card border border-border bg-surface p-4">
+      <div className="flex items-center gap-2 text-sm font-medium">
+        <FileText className="h-4 w-4 text-accent" />
+        QMT 预览计划
+        <span className="rounded-full bg-elevated px-2 py-0.5 text-[11px] text-muted">{plan.orders.length} 条</span>
+      </div>
+      <div className="mt-1 text-xs text-muted">{plan.generated_at ? `生成时间 ${plan.generated_at}` : '尚未生成'} · {plan.plan_id}</div>
+      <div className="mt-3 grid gap-3 lg:grid-cols-2">
+        <div>
+          <div className="text-xs text-muted">待执行清单</div>
+          <div className="mt-1 max-h-36 space-y-1 overflow-y-auto rounded border border-border bg-base p-2 text-xs">
+            {plan.orders.length === 0 && <div className="text-muted">无</div>}
+            {plan.orders.map(o => (
+              <div key={`${o.side}-${o.symbol}`} className="font-mono">
+                {o.side === 'buy' ? 'BUY' : 'SELL'} {o.symbol} {o.qty}股 ref={fmtNum(o.ref_price)}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-muted">跳过</div>
+          <div className="mt-1 max-h-36 space-y-1 overflow-y-auto rounded border border-border bg-base p-2 text-xs">
+            {plan.skipped.length === 0 && <div className="text-muted">无</div>}
+            {plan.skipped.map((s, i) => (
+              <div key={`${s.symbol}-${i}`}><span className="font-mono">{s.symbol}</span> · {s.message || s.reason}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="mt-3 text-xs text-muted">{plan.notice}</div>
+    </section>
+  )
+}
+
 export function Live() {
   const qc = useQueryClient()
   const [account, setAccount] = useState(() => localStorage.getItem(ACC_STORAGE_KEY) || 'default')
@@ -87,18 +124,48 @@ export function Live() {
   const [selectedSell, setSelectedSell] = useState<Set<string>>(new Set())
   const [confirm, setConfirm] = useState<'buy' | 'sell' | null>(null)
   const [lastResult, setLastResult] = useState<LiveOrderBatchResult | null>(null)
+  const [lastQmtPlan, setLastQmtPlan] = useState<LiveQmtOrderPlan | null>(null)
 
   const accountsQ = useQuery({ queryKey: QK.paperAccounts, queryFn: api.paperAccounts })
+  const autoRulesQ = useQuery({
+    queryKey: QK.paperAutoRules(account),
+    queryFn: () => api.paperAutoRules(account),
+  })
   const brokersQ = useQuery({ queryKey: QK.liveBrokers, queryFn: api.liveBrokers })
   const strategiesQ = useQuery({
     queryKey: QK.screenerStrategies('stock', 'all'),
     queryFn: () => api.screenerStrategies('stock', 'all'),
   })
 
-  const strategies = strategiesQ.data?.presets ?? []
+  const allStrategies = strategiesQ.data?.presets ?? []
+  const boundRules = useMemo(() => {
+    const seen = new Set<string>()
+    const out: PaperAutoRule[] = []
+    for (const rule of autoRulesQ.data?.rules ?? []) {
+      if (!rule.enabled || rule.match_kind !== 'strategy' || rule.side !== 'follow' || !rule.match_id) continue
+      if (seen.has(rule.match_id)) continue
+      seen.add(rule.match_id)
+      out.push(rule)
+    }
+    return out
+  }, [autoRulesQ.data?.rules])
+  const boundStrategyIds = useMemo(() => boundRules.map(rule => rule.match_id), [boundRules])
+  const strategies = useMemo(() => {
+    const byId = new Map(allStrategies.map(strategy => [strategy.id, strategy]))
+    return boundStrategyIds.map(id => byId.get(id) ?? { id, name: id })
+  }, [allStrategies, boundStrategyIds])
+  const selectedStrategyName = strategies.find(s => s.id === strategyId)?.name ?? strategyId
+  const hasBoundStrategies = boundStrategyIds.length > 0
   useEffect(() => {
-    if (!strategyId && strategies.length > 0) setStrategyId(strategies[0].id)
-  }, [strategyId, strategies])
+    if (boundStrategyIds.length === 0) {
+      if (strategyId) setStrategyId('')
+      return
+    }
+    if (!boundStrategyIds.includes(strategyId)) setStrategyId(boundStrategyIds[0])
+  }, [boundStrategyIds, strategyId])
+  useEffect(() => {
+    setLastQmtPlan(null)
+  }, [account, strategyId])
 
   const poolQ = useQuery({
     queryKey: QK.liveStrategyPool(strategyId, account, broker, asOf, topN, bufferN),
@@ -112,13 +179,13 @@ export function Live() {
       top_n: topN,
       buffer_n: bufferN,
     }),
-    enabled: !!strategyId,
+    enabled: !!strategyId && hasBoundStrategies,
   })
 
   const candidates = poolQ.data?.candidates ?? []
   const holdings = poolQ.data?.holdings ?? []
   const buyable = useMemo(() => candidates.filter(r => !r.in_position).map(r => r.symbol), [candidates])
-  const sellable = useMemo(() => holdings.filter(r => !r.in_buffer && Number(r.available_qty) > 0).map(r => r.symbol), [holdings])
+  const sellable = useMemo(() => holdings.filter(r => r.cycle_sellable && Number(r.cycle_sell_qty ?? r.available_qty) > 0).map(r => r.symbol), [holdings])
   const selectedBuyList = useMemo(() => buyable.filter(s => selectedBuy.has(s)), [buyable, selectedBuy])
   const selectedSellList = useMemo(() => sellable.filter(s => selectedSell.has(s)), [sellable, selectedSell])
   const brokerInfo = brokersQ.data?.brokers.find(b => b.id === broker)
@@ -175,6 +242,21 @@ export function Live() {
       invalidateAfterOrder()
     },
   })
+  const qmtPlanM = useMutation({
+    mutationFn: () => api.liveCreateQmtOrderPlan({
+      strategy_id: strategyId,
+      buy_symbols: selectedBuyList,
+      sell_symbols: selectedSellList,
+      account,
+      as_of: asOf || undefined,
+      asset_type: 'stock',
+      timeframe: '1d',
+      top_n: topN,
+      buffer_n: bufferN,
+      amount_per_symbol: amount,
+    }),
+    onSuccess: data => setLastQmtPlan(data),
+  })
 
   const toggle = (set: Dispatch<SetStateAction<Set<string>>>, symbol: string) => {
     set(prev => {
@@ -209,10 +291,16 @@ export function Live() {
         <section className="rounded-card border border-border bg-surface p-4">
           <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr_1fr_0.8fr_0.8fr_0.8fr_1fr]">
             <label className="text-xs text-muted">
-              策略
-              <select value={strategyId} onChange={e => setStrategyId(e.target.value)} className="mt-1 w-full rounded-btn border border-border bg-base px-2 py-2 text-sm text-foreground outline-none focus:border-accent/50">
-                {strategies.map(s => <option key={s.id} value={s.id}>{s.name || s.id}</option>)}
-              </select>
+              账户策略
+              {boundStrategyIds.length <= 1 ? (
+                <div className="mt-1 w-full truncate rounded-btn border border-border bg-elevated px-2 py-2 text-sm text-foreground" title={selectedStrategyName || '未绑定策略'}>
+                  {autoRulesQ.isLoading ? '读取中…' : selectedStrategyName || '未绑定策略'}
+                </div>
+              ) : (
+                <select value={strategyId} onChange={e => setStrategyId(e.target.value)} className="mt-1 w-full rounded-btn border border-border bg-base px-2 py-2 text-sm text-foreground outline-none focus:border-accent/50">
+                  {strategies.map(s => <option key={s.id} value={s.id}>{s.name || s.id}</option>)}
+                </select>
+              )}
             </label>
             <label className="text-xs text-muted">
               账户
@@ -258,6 +346,23 @@ export function Live() {
                 {ORDER_TYPE_LABEL[t]}
               </button>
             ))}
+            <button
+              onClick={() => qmtPlanM.mutate()}
+              disabled={!strategyId || !hasBoundStrategies || qmtPlanM.isPending}
+              className="inline-flex items-center gap-1 rounded-btn border border-accent/40 px-3 py-1 text-xs text-accent transition-colors hover:bg-accent/10 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              生成 QMT 预览计划
+            </button>
+            {qmtPlanM.isError && (
+              <span className="text-xs text-danger">{qmtPlanM.error instanceof Error ? qmtPlanM.error.message : '生成失败'}</span>
+            )}
+            {!autoRulesQ.isLoading && !hasBoundStrategies && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-1 text-[11px] text-warning">
+                <AlertTriangle className="h-3 w-3" />
+                当前账户未启用策略跟随规则
+              </span>
+            )}
             {brokerDisabled && (
               <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-1 text-[11px] text-warning">
                 <AlertTriangle className="h-3 w-3" />
@@ -318,8 +423,8 @@ export function Live() {
           <section className="rounded-card border border-border bg-surface">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div>
-                <div className="flex items-center gap-2 text-sm font-medium"><TrendingDown className="h-4 w-4 text-danger" />缓冲池卖出</div>
-                <div className="mt-0.5 text-[11px] text-muted">当前持仓 · Buffer {poolQ.data?.buffer_n ?? bufferN}</div>
+                <div className="flex items-center gap-2 text-sm font-medium"><TrendingDown className="h-4 w-4 text-danger" />周期卖出</div>
+                <div className="mt-0.5 text-[11px] text-muted">当前持仓 · 持有周期 {poolQ.data?.max_hold_days ?? '--'} 个交易日</div>
               </div>
               <button
                 onClick={() => setConfirm('sell')}
@@ -338,23 +443,25 @@ export function Live() {
                     <th className="px-3 py-2 text-right">数量</th>
                     <th className="px-3 py-2 text-right">可卖</th>
                     <th className="px-3 py-2 text-right">盈亏</th>
+                    <th className="px-3 py-2 text-right">周期</th>
                     <th className="px-3 py-2 text-right">状态</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {poolQ.isFetching && <tr><td colSpan={6} className="px-3 py-8 text-center text-muted">加载中…</td></tr>}
-                  {!poolQ.isFetching && holdings.length === 0 && <tr><td colSpan={6} className="px-3 py-8 text-center text-muted">暂无持仓</td></tr>}
+                  {poolQ.isFetching && <tr><td colSpan={7} className="px-3 py-8 text-center text-muted">加载中…</td></tr>}
+                  {!poolQ.isFetching && holdings.length === 0 && <tr><td colSpan={7} className="px-3 py-8 text-center text-muted">暂无持仓</td></tr>}
                   {holdings.map(r => {
-                    const canSell = !r.in_buffer && Number(r.available_qty) > 0
+                    const canSell = Boolean(r.cycle_sellable) && Number(r.cycle_sell_qty ?? r.available_qty) > 0
                     return (
                       <tr key={r.symbol} className="border-b border-border/60 last:border-b-0 hover:bg-elevated/40">
                         <td className="px-3 py-2"><input type="checkbox" disabled={!canSell} checked={selectedSell.has(r.symbol)} onChange={() => toggle(setSelectedSell, r.symbol)} /></td>
                         <td className="px-3 py-2"><div className="font-mono text-foreground">{r.symbol}</div><div className="text-[11px] text-muted">{r.name || '--'}</div></td>
                         <td className="px-3 py-2 text-right font-mono">{fmtNum(r.qty, 0)}</td>
-                        <td className="px-3 py-2 text-right font-mono">{fmtNum(r.available_qty, 0)}</td>
+                        <td className="px-3 py-2 text-right font-mono">{fmtNum(r.cycle_sell_qty ?? r.available_qty, 0)}</td>
                         <td className={cn('px-3 py-2 text-right font-mono', priceColorClass(r.pnl_pct))}>{fmtNum(r.pnl)} · {fmtPctPercent(r.pnl_pct)}</td>
+                        <td className="px-3 py-2 text-right font-mono">{fmtNum(r.hold_days ?? 0, 0)}/{fmtNum(r.max_hold_days ?? poolQ.data?.max_hold_days ?? 0, 0)}</td>
                         <td className="px-3 py-2 text-right">
-                          {r.in_buffer ? <span className="text-muted">缓冲内</span> : canSell ? <span className="text-danger">可卖</span> : <span className="text-warning">T+1</span>}
+                          {canSell ? <span className="text-danger">到期</span> : Number(r.available_qty) <= 0 ? <span className="text-warning">T+1</span> : <span className="text-muted">未到期</span>}
                         </td>
                       </tr>
                     )
@@ -366,6 +473,7 @@ export function Live() {
         </div>
 
         <ResultPanel result={lastResult} />
+        <QmtPlanPanel plan={lastQmtPlan} />
       </div>
 
       {confirm && (
