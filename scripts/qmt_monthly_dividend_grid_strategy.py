@@ -27,26 +27,26 @@ STRATEGY_NAME = "monthly_dividend_grid"
 # ETF proxies. Adjust these if your QMT data source uses different symbols.
 ETF_CONFIG = [
     # symbol, name, target weight, first usable date in this strategy
-    ("510300.SH", "HS300 ETF", 0.20, "20000101"),
-    ("510050.SH", "SSE50 ETF", 0.10, "20000101"),
-    ("510500.SH", "CSI500 ETF", 0.10, "20000101"),
-    ("512100.SH", "CSI1000 ETF", 0.10, "20170101"),
-    ("510880.SH", "SSE Dividend ETF", 0.25, "20000101"),
-    ("515080.SH", "CSI Dividend ETF", 0.12, "20200101"),
-    ("512890.SH", "Dividend LowVol ETF", 0.08, "20200101"),
-    ("518880.SH", "Gold ETF", 0.05, "20170101"),
+    ("510300.SH", "HS300 ETF", 0.18, "20120528"),
+    ("510050.SH", "SSE50 ETF", 0.10, "20050223"),
+    ("510500.SH", "CSI500 ETF", 0.07, "20130315"),
+    ("512100.SH", "CSI1000 ETF", 0.05, "20161104"),
+    ("510880.SH", "SSE Dividend ETF", 0.28, "20070118"),
+    ("515080.SH", "CSI Dividend ETF", 0.13, "20200101"),
+    ("512890.SH", "Dividend LowVol ETF", 0.09, "20200101"),
+    ("518880.SH", "Gold ETF", 0.10, "20130729"),
 ]
 BACKTEST_START_DATE = "20170101"
 
 INITIAL_CAPITAL = 1000000.0
-CASH_BUFFER_PCT = 0.08
+CASH_BUFFER_PCT = 0.15
 GRID_STEP = 0.04              # every 4% drawdown adds one tranche
 GRID_TAKE_PROFIT = 0.04       # 4% rebound trims one tranche
-GRID_TRANCHE_PCT = 0.06       # each grid add uses 6% of total equity
-MAX_GRID_LEVEL = 4
+GRID_TRANCHE_PCT = 0.04       # each grid add uses 4% of total equity
+MAX_GRID_LEVEL = 3
 MA_LOOKBACK = 60
-LOW_PRICE_DISCOUNT = 0.02     # only add below MA60 * (1 - 2%)
-DRIFT_REBALANCE_PCT = 0.12    # monthly target drift threshold
+LOW_PRICE_DISCOUNT = 0.04     # only add below MA60 * (1 - 4%)
+DRIFT_REBALANCE_PCT = 0.15    # monthly target drift threshold
 MIN_ORDER_VALUE = 3000.0
 ORDER_CASH_SAFETY = 0.98     # leave room for QMT price/fee rounding
 
@@ -70,9 +70,45 @@ STATE = {
     "last_run_date": "",
 }
 
+TRADE_LOG = []
+
 
 def _log(msg):
     print("[DIV-GRID]", msg)
+
+
+def _log_trade(date_text, side, symbol, qty, price, reason):
+    names = _names()
+    side_text = "BUY" if side == "buy" else "SELL"
+    amount = float(qty) * float(price)
+    row = {
+        "date": str(date_text),
+        "side": side_text,
+        "symbol": symbol,
+        "name": names.get(symbol, ""),
+        "qty": int(qty),
+        "price": float(price),
+        "amount": amount,
+        "reason": reason,
+        "cash": float(STATE["cash"]),
+        "pos": int(STATE["pos"].get(symbol, 0)),
+    }
+    TRADE_LOG.append(row)
+    print(
+        "[TRADE] date={0} side={1} symbol={2} name={3} qty={4} price={5:.4f} "
+        "amount={6:.2f} reason={7} cash={8:.2f} pos={9}".format(
+            row["date"],
+            row["side"],
+            row["symbol"],
+            row["name"],
+            row["qty"],
+            row["price"],
+            row["amount"],
+            row["reason"],
+            row["cash"],
+            row["pos"],
+        )
+    )
 
 
 def _symbols():
@@ -93,6 +129,8 @@ def _start_dates():
 
 def _active_symbols(date_text):
     starts = _start_dates()
+    if str(date_text) < BACKTEST_START_DATE:
+        return []
     return [symbol for symbol in _symbols() if str(date_text) >= starts.get(symbol, "19000101")]
 
 
@@ -297,6 +335,7 @@ def _send_order(ContextInfo, symbol, side, qty, price, reason):
     else:
         STATE["cash"] += qty * price
         STATE["pos"][symbol] = int(STATE["pos"].get(symbol, 0)) - qty
+    _log_trade(_bar_date(ContextInfo), side, symbol, qty, price, reason)
     return True
 
 
@@ -368,6 +407,8 @@ def _grid_actions(ContextInfo, prices, total_value):
 
 def _run_monthly(ContextInfo):
     date_text = _bar_date(ContextInfo)
+    if date_text < BACKTEST_START_DATE:
+        return
     if date_text == STATE["last_run_date"]:
         return
     STATE["last_run_date"] = date_text
